@@ -79,7 +79,7 @@ export default function Camera() {
       }
 
       // Assume the most recent 3 are from our app
-      setCapturedPhotos(recentPhotos.slice(0, 3));
+      setCapturedPhotos(recentPhotos.slice(0, 5));
     } catch (error) {
       console.error('Error loading recent photos:', error);
     }

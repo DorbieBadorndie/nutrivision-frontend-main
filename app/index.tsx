@@ -103,7 +103,7 @@ export default function HomeScreen() {
 
   // When the check button is pressed, navigate to 'Page-6'
   const handleCheck = () => {
-    navigation.navigate('page-6');
+    navigation.navigate('5.1 User Nutrient Page');
   };
 
   return (
@@ -210,7 +210,7 @@ export default function HomeScreen() {
                   </View>
                   <View style={styles.bottomLeft}>
                     <ThemedText style={styles.ageSubtitle}>
-                      Weight affects nutrient needs by influencing metabolism and absorption.
+                      Weight affects nutrient needs by influencing metabolism and abssadsaaadsorption.
                     </ThemedText>
                   </View>
                 </View>

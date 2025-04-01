@@ -91,34 +91,40 @@ export default function UserNutrientPage() {
     // USER INTAKE SECTION
   return (
     <View style={styles.container}>
-  <View style={styles.header}>  {/* NEW: Wrapped logo & card in a header View */}
-    <Image source={require('@/assets/images/NutriVision.png')} style={styles.logo} />
+    <View style={styles.header}>
+      <Image 
+        source={require('@/assets/images/NutriVision.png')} 
+        style={styles.logo}
+        resizeMode="contain"
+      />
+    </View>
     <View style={styles.userIntakeCard}>
       <Text style={styles.userText}>User </Text>
       <Text style={styles.intakeText}>Intake</Text>
     </View>
-  </View>
-  <View style={styles.content}>
+    {/* Thumbnails of captured photos */}
+   <View style={styles.content}>
     <View style={styles.thumbnailWrapper}>
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.thumbnailsRow}>
+      <ScrollView 
+        horizontal 
+        showsHorizontalScrollIndicator={false} 
+        contentContainerStyle={styles.thumbnailsRow}
+      >
         {capturedPhotos.map((item, index) => (
           <View key={index} style={styles.thumbnailContainer}>
-            <View style={styles.thumbnail}>
             {item.uri ? (
               <Image 
                 source={{ uri: item.uri }} 
                 style={styles.thumbnail}
-                onError={() => console.log("Image failed to load")}/>
-              ) : (
-              <Text style={{ color: 'gray', fontSize: 10 }}>No Image</Text>
-              )}
-            </View>
-              <View style={[
-                styles.thumbnailIndicator,
-                item.type === 'label' ? styles.labelIndicator : styles.fruitIndicator
-              ]}/>
-      </View>
-))}
+                onError={() => console.log("Image failed to load")}
+              />
+            ) : (
+              <View style={styles.thumbnail}>
+                <Text style={styles.placeholderText}>No Image</Text>
+              </View>
+            )}
+          </View>
+        ))}
       </ScrollView>
     </View>
   </View>
@@ -134,28 +140,25 @@ export default function UserNutrientPage() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: 'flex-start',
-    justifyContent: 'flex-start',
-    padding: 0,
     backgroundColor: '#F5F5F5',
+    paddingHorizontal: 20,
   },
-  header: {  // NEW: Proper header container
-    paddingTop: 50,
-    paddingLeft: 1,
-    marginBottom: 20,
+  header: {
+    marginLeft: -15,
+    width: '100%',
+    height: 100, // Fixed height for logo container
+    justifyContent: 'center',
+    alignItems: 'flex-start',
+    marginBottom: 10,
   },
   logo: {
-    top: -5 * (height * 0.01),
-    left: width * 0.02,
     width: 200,
-    height: 200,
-    resizeMode: 'contain',
+    height: 150, // Fixed height for logo
   },
   userIntakeCard: {
+    marginTop: -15,
     backgroundColor: 'white',
-    marginTop: -40,  // NEW: Slight overlap with logo (optional)
-    marginLeft: 10,
-    padding: 10,
+    padding: 15,
     borderRadius: 12,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
@@ -163,6 +166,8 @@ const styles = StyleSheet.create({
     shadowRadius: 6,
     elevation: 4,
     flexDirection: 'row',
+    alignSelf: 'flex-start', // Makes card only as wide as its content
+    marginBottom: 20,
   },
   userText: {
     color: '#9AB206',
@@ -192,12 +197,11 @@ const styles = StyleSheet.create({
     color: '#9AB206', // ✅ Ensured consistent color
     fontWeight: 'bold',
   },
-  content: {  // NEW: Dedicated space for thumbnails
-    flex: 1,
-    paddingHorizontal: 20,
+  content: {
+    flex: 1,  // Takes remaining space
+    paddingTop: 0, 
   },
   thumbnailWrapper: {
-    marginTop: 20,
     backgroundColor: 'white',
     borderRadius: 12,
     padding: 10,
@@ -206,56 +210,33 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 6,
     elevation: 4,
-    alignItems: 'center',
-    justifyContent: 'center',
+    marginHorizontal: 20, // Add matching horizontal margin
+    // Let height be determined by content
   },  
   thumbnailsRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    height: 80,
-    backgroundColor: '#FFFFFF',
-    paddingVertical: 10,
-    paddingHorizontal: 5,
-    zIndex: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: '#EEEEEE',
-    elevation: 3,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 3,
+    // Remove fixed height to let it size to content
+    paddingVertical: 10, // Vertical padding inside scroll area
+    paddingHorizontal: 5, // Horizontal padding inside scroll area
   },
   thumbnailContainer: {
-    width: 60,
-    height: 60,
-    borderRadius: 12,
+    width: 60,  // Match image width
+    height: 60, // Match image height
     marginHorizontal: 5,
-    position: 'relative',
-    overflow: 'hidden',
-    elevation: 3,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#DDDDDD',
+    overflow: 'hidden', // Ensures image stays within rounded borders
   },
   thumbnail: {
     width: '100%',
     height: '100%',
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: '#DDDDDD',
-    justifyContent: 'center',
-    alignItems: 'center',
-    overflow: 'hidden',
   },
-  thumbnailIndicator: {
-    position: 'absolute',
-    bottom: 2,
-    right: 2,
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-  },
-  labelIndicator: {
-    backgroundColor: '#f5dd4b',
-  },
-  fruitIndicator: {
-    backgroundColor: '#81b0ff',
-  },
+  placeholderText: {
+    color: 'gray',
+    fontSize: 10,
+    textAlign: 'center',
+    marginTop: 20 // Rough vertical centering
+  }
 });

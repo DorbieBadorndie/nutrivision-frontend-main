@@ -105,6 +105,9 @@ export default function HomeScreen() {
   const handleCheck = () => {
     navigation.navigate('nutrient-page');
   };
+  const handleNext = () => {
+    navigation.navigate('feedback');
+  };
 
   return (
     <View style={{ flex: 1 }}>
@@ -283,9 +286,15 @@ export default function HomeScreen() {
       </KeyboardAvoidingView>
       
       {/* Floating check button outside the KeyboardAvoidingView */}
+      <TouchableOpacity style={styles.checkButton1} onPress={handleNext}>
+        <ThemedText style={styles.checkMark}>✓</ThemedText>
+      </TouchableOpacity>
+
+      {/* Floating check button outside the KeyboardAvoidingView */}
       <TouchableOpacity style={styles.checkButton} onPress={handleCheck}>
         <ThemedText style={styles.checkMark}>✓</ThemedText>
       </TouchableOpacity>
+
     </View>
   );
 }
@@ -482,6 +491,22 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   checkMark: {
+    fontSize: 25,
+    color: '#9AB106',
+    fontWeight: 'bold',
+  },
+  checkButton1: {
+    position: 'absolute',
+    bottom: 100,
+    right: 20,
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: '#333',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  checkMark1: {
     fontSize: 25,
     color: '#9AB106',
     fontWeight: 'bold',

@@ -19,6 +19,7 @@ import { ThemedView } from '@/components/ThemedView';
 import { ThemedText } from '@/components/ThemedText';
 import Carousel from 'react-native-reanimated-carousel';
 import { RootStackParamList } from '@/types/types'; // adjust path as needed
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -107,6 +108,7 @@ export default function HomeScreen() {
   };
 
   return (
+    <SafeAreaView style={{ flex: 1 }}>
     <View style={{ flex: 1 }}>
       <KeyboardAvoidingView
         style={{ flex: 1 }}
@@ -282,11 +284,13 @@ export default function HomeScreen() {
         </TouchableWithoutFeedback>
       </KeyboardAvoidingView>
       
+      
       {/* Floating check button outside the KeyboardAvoidingView */}
       <TouchableOpacity style={styles.checkButton} onPress={handleCheck}>
         <ThemedText style={styles.checkMark}>✓</ThemedText>
       </TouchableOpacity>
     </View>
+    </SafeAreaView>
   );
 }
 
@@ -295,12 +299,10 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   image: {
-    position: 'absolute',
-    top: -15,
-    left: -7,
     width: 200,
-    height: 200,
+    height: 60,
     resizeMode: 'contain',
+    alignSelf: "flex-start"
   },
   carouselContainer: {
     marginTop: 20,
@@ -472,7 +474,7 @@ const styles = StyleSheet.create({
   },
   checkButton: {
     position: 'absolute',
-    bottom: 40,
+    bottom: 10,
     right: 20,
     width: 60,
     height: 60,
@@ -487,7 +489,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   profileBox: {
-    marginTop: 120,
+    marginTop: 15,
     marginLeft: 10,
     width: 150,
     height: 50,

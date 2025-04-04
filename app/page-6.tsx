@@ -98,13 +98,14 @@ export default function Page6() {
   const navigation = useNavigation<HomeScreenNavigationProp>();
   return (
     <SafeAreaView style={styles.container}>
-    <ThemedView style={styles.container}>
       <Image
         source={require('@/assets/images/NutriVision.png')}
         style={styles.logo}
         accessibilityRole="image"
         accessibilityLabel="NutriVision logo"
       />
+    <ThemedView style={styles.container}>
+      
       <View style={styles.detailBox}>
         {/* Row 1: Legends */}
         <View style={styles.row}>
@@ -320,7 +321,8 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#eff1f6',
-    alignItems: "center"
+    alignItems: "center",
+    gap: 10,
   },
   logo: {
     width: 200,
@@ -424,16 +426,14 @@ const styles = StyleSheet.create({
   measurementTextDown: {
     fontSize: 12,
     color: '#9AB106',
-    marginTop: -8,
+    marginTop: -5,
     fontWeight: 'bold',
   },
   newBox: {
-    marginTop: 14,
-    marginHorizontal: 10,
     width: screenWidth - 32,
     backgroundColor: 'white',
     borderRadius: 12,
-    padding: 10,
+    padding: 20,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
@@ -457,7 +457,6 @@ const styles = StyleSheet.create({
   newLegendTitle: {
     fontSize: 18,
     fontWeight: 'bold',
-    marginBottom: 8,
     marginLeft: -20
   },
   newLegendItem: {
@@ -477,7 +476,6 @@ const styles = StyleSheet.create({
   },
   newTotalBox: {
     backgroundColor: '#f8e4e4',
-    marginTop: 10,
     padding: 10,
     borderRadius: 15,
     alignItems: 'flex-start',

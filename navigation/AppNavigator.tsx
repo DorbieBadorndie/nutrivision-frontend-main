@@ -13,8 +13,8 @@ const Stack = createStackNavigator<RootStackParamList>();
 export default function AppNavigator() {
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="Index">
-        <Stack.Screen name="Index" component={Index} />
+      <Stack.Navigator initialRouteName="index">
+        <Stack.Screen name="index" component={index} />
         <Stack.Screen name="page-6" component={Page6} />
         <Stack.Screen name="nutrient-page" component={UserNutrientPage} />
         <Stack.Screen name="camera" component={Camera} />

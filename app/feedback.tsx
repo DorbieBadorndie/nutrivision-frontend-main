@@ -83,7 +83,7 @@ function Feedback() {
     
 
     const handleCheck = () => {
-        navigation.navigate('camera');
+        navigation.navigate('Index');
       };
       
     return (
@@ -133,7 +133,12 @@ function Feedback() {
                 </ScrollView>
             </KeyboardAvoidingView>
             <TouchableOpacity style={styles.checkButton} onPress={handleCheck}>
-                <ThemedText style={styles.checkMark}>✓</ThemedText>
+                <ThemedText style={styles.checkMark}>
+                    <Image 
+                        source={require('@/assets/images/Home.png')} 
+                        style={{ width: 30, height: 30 }} // Adjust the size as needed
+                    />
+                </ThemedText>
             </TouchableOpacity>
         </SafeAreaView>
     );

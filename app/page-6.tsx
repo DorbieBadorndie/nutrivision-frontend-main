@@ -222,7 +222,7 @@ const styles = StyleSheet.create({
   },
   itemText: {
     fontSize: 14,
-    color: '#333',
+    color: '#333', //burat
     marginRight: 4,
     fontWeight: 'bold'
   },

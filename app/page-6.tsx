@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, View, Image, Dimensions, Text, DimensionValue } from 'react-native';
+import { StyleSheet, View, Image, Dimensions, Text, DimensionValue, SafeAreaView } from 'react-native';
 import { ThemedView } from '@/components/ThemedView';
 import { ThemedText } from '@/components/ThemedText';
 import PieChart from 'react-native-pie-chart';
@@ -72,6 +72,7 @@ export default function Page6() {
   ];
 
   return (
+    <SafeAreaView style={styles.container}>
     <ThemedView style={styles.container}>
       <Image
         source={require('@/assets/images/NutriVision.png')}
@@ -240,6 +241,7 @@ export default function Page6() {
         </View>
       ))}
     </ThemedView>
+    </SafeAreaView>
   );
 }
 
@@ -249,19 +251,18 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#eff1f6',
+    alignItems: "center"
   },
   logo: {
-    position: 'absolute',
-    top: -15,
-    left: -7,
     width: 200,
-    height: 200,
+    height: 60,
     resizeMode: 'contain',
+    alignSelf: "flex-start"
   },
   detailBox: {
-    marginTop: 120,
+    marginTop: 20,
     marginHorizontal: 10,
-    width: screenWidth - 20,
+    width: screenWidth - 32,
     backgroundColor: 'white',
     borderRadius: 12,
     padding: 10,
@@ -363,7 +364,7 @@ const styles = StyleSheet.create({
   newBox: {
     marginTop: 20,
     marginHorizontal: 10,
-    width: screenWidth - 20,
+    width: screenWidth - 32,
     backgroundColor: 'white',
     borderRadius: 12,
     padding: 10,

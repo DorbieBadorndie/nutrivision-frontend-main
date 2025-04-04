@@ -1,5 +1,17 @@
-import { useState } from 'react';
-import { View, Text, StyleSheet, Image, Dimensions, SafeAreaView } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { 
+  View, 
+  Image, 
+  Text, 
+  StyleSheet, 
+  Dimensions, 
+  TouchableOpacity, 
+  Platform, 
+  ScrollView, 
+  SafeAreaView, 
+  TextInput,
+  KeyboardAvoidingView
+} from 'react-native';
 import { ThemedView } from '@/components/ThemedView';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');

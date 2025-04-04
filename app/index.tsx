@@ -115,7 +115,7 @@ export default function HomeScreen() {
         keyboardVerticalOffset={Platform.OS === 'ios' ? 20 : 0} // Adjust as needed
       >
         <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
-          <ThemedView style={[styles.container, { backgroundColor: '#eff1f6' }]}>
+          
             <ScrollView contentContainerStyle={{ flexGrow: 1 }} keyboardShouldPersistTaps="handled">
               {/* Background/Top Image */}
               <Image
@@ -124,7 +124,8 @@ export default function HomeScreen() {
                 accessibilityRole="image"
                 accessibilityLabel="NutriVision logo"
               />
-
+              <ThemedView style={[styles.container, { backgroundColor: '#eff1f6' }]}>
+              {/* Logo kept from original */}
               {/* ===== NEW PROFILE BOX ===== */}
               <View style={styles.profileBox}>
                 <ThemedText style={styles.profileBoxText}>
@@ -240,7 +241,7 @@ export default function HomeScreen() {
                   </View>
                 </View>
               </View>
-
+             
               {/* =============== HEIGHT CONTAINER =============== */}
               <View style={styles.heightContainer}>
                 <View style={styles.leftColumn}>
@@ -274,15 +275,19 @@ export default function HomeScreen() {
                         onValueChange={toggleHeightUnit}
                       />
                       <ThemedText style={styles.switchLabel}>cm</ThemedText>
+                      
                     </View>
+                    
                   </View>
+                  
                 </View>
               </View>
+               </ThemedView>
             </ScrollView>
-          </ThemedView>
+            
         </TouchableWithoutFeedback>
+        
       </KeyboardAvoidingView>
-      
       
       {/* Floating check button outside the KeyboardAvoidingView */}
       <TouchableOpacity style={styles.checkButton} onPress={handleCheck}>
@@ -295,6 +300,8 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    gap: 10,
+    padding: 10,
   },
   image: {
     width: 200,
@@ -303,14 +310,12 @@ const styles = StyleSheet.create({
     alignSelf: "flex-start"
   },
   carouselContainer: {
-    marginTop: 20,
     alignItems: 'center',
   },
   carouselDetailBox: {
     backgroundColor: 'white',
     borderRadius: 12,
     padding: 16,
-    marginHorizontal: 10,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
@@ -328,16 +333,15 @@ const styles = StyleSheet.create({
   paginationContainer: {
     flexDirection: 'row',
     justifyContent: 'center',
-    marginTop: 8,
   },
   dot: {
     width: 8,
     height: 8,
     borderRadius: 4,
     marginHorizontal: 3,
+    marginTop: 8,
   },
   ageContainer: {
-    marginTop: 20,
     width: SCREEN_WIDTH - 20,
     alignSelf: 'center',
     flexDirection: 'row',
@@ -352,7 +356,6 @@ const styles = StyleSheet.create({
     elevation: 4,
   },
   weightContainer: {
-    marginTop: 20,
     width: SCREEN_WIDTH - 20,
     alignSelf: 'center',
     flexDirection: 'row',
@@ -367,7 +370,6 @@ const styles = StyleSheet.create({
     elevation: 4,
   },
   heightContainer: {
-    marginTop: 20,
     width: SCREEN_WIDTH - 20,
     alignSelf: 'center',
     flexDirection: 'row',
@@ -487,8 +489,6 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   profileBox: {
-    marginTop: 15,
-    marginLeft: 10,
     width: 150,
     height: 50,
     backgroundColor: 'white',

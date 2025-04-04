@@ -23,7 +23,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
-type HomeScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Index'>;
+type HomeScreenNavigationProp = StackNavigationProp<RootStackParamList, 'index'>;
 
 export default function HomeScreen() {
   // ======== AGE STATE ========
@@ -109,7 +109,6 @@ export default function HomeScreen() {
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
-    <View style={{ flex: 1 }}>
       <KeyboardAvoidingView
         style={{ flex: 1 }}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -289,7 +288,6 @@ export default function HomeScreen() {
       <TouchableOpacity style={styles.checkButton} onPress={handleCheck}>
         <ThemedText style={styles.checkMark}>✓</ThemedText>
       </TouchableOpacity>
-    </View>
     </SafeAreaView>
   );
 }
@@ -474,7 +472,7 @@ const styles = StyleSheet.create({
   },
   checkButton: {
     position: 'absolute',
-    bottom: 10,
+    bottom: 40,
     right: 20,
     width: 60,
     height: 60,

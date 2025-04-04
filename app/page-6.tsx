@@ -1,14 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, View, Image, Dimensions, Text, DimensionValue, SafeAreaView } from 'react-native';
+import { StyleSheet, View, Image, Dimensions, Text, DimensionValue, SafeAreaView, TouchableOpacity } from 'react-native';
 import { ThemedView } from '@/components/ThemedView';
 import { ThemedText } from '@/components/ThemedText';
 import PieChart from 'react-native-pie-chart';
-
+import { useNavigation } from '@react-navigation/native';
+import { RootStackParamList } from '@/types/types'; // adjust path as needed
+import { StackNavigationProp } from '@react-navigation/stack';
 // Helper functions with proper typing
 const toProgressWidth = (value: number): DimensionValue => `${value}%` as DimensionValue;
 const toPercentageText = (value: number): string => `${value}%`;
 const formatValue = (value: number, unit: string = 'g'): string => `${value} ${unit}`;
 
+type Page6ScreenNavigationProp = StackNavigationProp<RootStackParamList, 'page-6'>;
 interface NutritionData {
   progress: {
     sugar: { user: number; avg: number };
@@ -24,25 +27,34 @@ interface NutritionData {
     breakdown: { calories: number; sugar: number; sodium: number };
     total: number;
   };
+  avg: {
+    breakdown: { calories: number; sugar: number; sodium: number };
+    total: number;
+  }
 }
 
 export default function Page6() {
-  const [nutritionData, setNutritionData] = useState<NutritionData>({
+  const [nutritionData] = useState<NutritionData>({
     progress: {
-      sugar: { user: 53, avg: 49 },
-      sodium: { user: 33, avg: 27 },
-      calories: { user: 45, avg: 40 },
+      sugar: { user: 88, avg: 50 },
+      sodium: { user: 33, avg: 50 },
+      calories: { user: 45, avg: 50 },
     },
     values: {
       sugar: { user: 53, avg: 49 },
       sodium: { user: 15, avg: 11 },
-      calories: { user: 180, avg: 147 },
+      calories: { user: 180, avg: 147 }, 
     },
     intake: { 
       breakdown: { calories: 33, sugar: 45, sodium: 22 },
       total: 209
-    }
+    },
+    avg: { 
+      breakdown: { calories: 22, sugar: 45, sodium: 11 },
+      total: 210
+    },
   });
+  
 
   // Progress widths (for style width)
   const progressWidthUserSugar = toProgressWidth(nutritionData.progress.sugar.user);
@@ -62,6 +74,10 @@ export default function Page6() {
   const textUserIntakeCalories = toPercentageText(nutritionData.intake.breakdown.calories);
   const textUserIntakeSugar = toPercentageText(nutritionData.intake.breakdown.sugar);
   const textUserIntake = toPercentageText(nutritionData.intake.breakdown.sodium);
+  const textAvgIntakeCalories = toPercentageText(nutritionData.avg.breakdown.calories);
+  const textAvgIntakeSugar = toPercentageText(nutritionData.avg.breakdown.sugar);
+  const textAvgIntake = toPercentageText(nutritionData.avg.breakdown.sodium);
+  const totalAvgIntake = formatValue(nutritionData.avg.total);
   const totalUserIntake = formatValue(nutritionData.intake.total);
 
   // Donut series
@@ -71,6 +87,15 @@ export default function Page6() {
     { value: nutritionData.intake.breakdown.calories, color: '#7ca844' },
   ];
 
+  const handleCheck = () => {
+    navigation.navigate('page-2');
+  };
+
+  
+  
+
+  type HomeScreenNavigationProp = StackNavigationProp<RootStackParamList, 'page-6'>;
+  const navigation = useNavigation<HomeScreenNavigationProp>();
   return (
     <SafeAreaView style={styles.container}>
     <ThemedView style={styles.container}>
@@ -207,40 +232,84 @@ export default function Page6() {
       </View>
 
       {/* Donut Chart Boxes */}
-      {['User Intake', 'Average Intake'].map((title, index) => (
-        <View key={title} style={styles.newBox}>
-          <View style={styles.innerRow}>
-            <View style={styles.newLeftColumn}>
-              <PieChart
-                widthAndHeight={170}
-                series={donutSeries}
-                cover={0.55}
-              />
-            </View>
-            <View style={styles.newRightColumn}>
-              <Text style={styles.newLegendTitle}>{title}</Text>
-              <View style={styles.newLegendItem}>
-                <View style={[styles.newCircle, { backgroundColor: '#7ca844' }]} />
-                <Text style={styles.newLegendText}>Calories ({textUserIntakeCalories})</Text>
-              </View>
-              <View style={styles.newLegendItem}>
-                <View style={[styles.newCircle, { backgroundColor: '#c0b4b4' }]} />
-                <Text style={styles.newLegendText}>Sugar ({textUserIntakeSugar})</Text>
-              </View>
-              <View style={styles.newLegendItem}>
-                <View style={[styles.newCircle, { backgroundColor: '#000000' }]} />
-                <Text style={styles.newLegendText}>Sodium ({textUserIntake})</Text>
-              </View>
-              <View style={styles.newTotalBox}>
-                <Text style={styles.newTotalText}>
-                  Total Nutrient{'\n'}Amount = {totalUserIntake}
-                </Text>
-              </View>
-            </View>
-          </View>
-        </View>
-      ))}
+      {/* User Intake Donut Chart */}
+<View style={styles.newBox}>
+  <View style={styles.innerRow}>
+    <View style={styles.newLeftColumn}>
+      <PieChart
+        widthAndHeight={170}
+        series={[
+          { value: nutritionData.intake.breakdown.sodium, color: '#000000' },
+          { value: nutritionData.intake.breakdown.sugar, color: '#c0b4b4' },
+          { value: nutritionData.intake.breakdown.calories, color: '#7ca844' },
+        ]}
+        cover={0.55}
+      />
+    </View>
+    <View style={styles.newRightColumn}>
+      <Text style={styles.newLegendTitle}>User Intake</Text>
+      <View style={styles.newLegendItem}>
+        <View style={[styles.newCircle, { backgroundColor: '#7ca844' }]} />
+        <Text style={styles.newLegendText}>Calories ({textUserIntakeCalories})</Text>
+      </View>
+      <View style={styles.newLegendItem}>
+        <View style={[styles.newCircle, { backgroundColor: '#c0b4b4' }]} />
+        <Text style={styles.newLegendText}>Sugar ({textUserIntakeSugar})</Text>
+      </View>
+      <View style={styles.newLegendItem}>
+        <View style={[styles.newCircle, { backgroundColor: '#000000' }]} />
+        <Text style={styles.newLegendText}>Sodium ({textUserIntake})</Text>
+      </View>
+      <View style={styles.newTotalBox}>
+        <Text style={styles.newTotalText}>
+          Total Nutrient{'\n'}Amount = {totalUserIntake}
+        </Text>
+      </View>
+    </View>
+  </View>
+</View>
+
+{/* Average Intake Donut Chart */}
+<View style={styles.newBox}>
+  <View style={styles.innerRow}>
+    <View style={styles.newLeftColumn}>
+      <PieChart
+        widthAndHeight={170}
+        series={[
+          { value: nutritionData.avg.breakdown.sodium, color: '#000000' },
+          { value: nutritionData.avg.breakdown.sugar, color: '#c0b4b4' },
+          { value: nutritionData.avg.breakdown.calories, color: '#7ca844' },
+        ]}
+        cover={0.55}
+      />
+    </View>
+    <View style={styles.newRightColumn}>
+      <Text style={styles.newLegendTitle}>Average Intake</Text>
+      <View style={styles.newLegendItem}>
+        <View style={[styles.newCircle, { backgroundColor: '#7ca844' }]} />
+        <Text style={styles.newLegendText}>Calories ({textAvgIntakeCalories})</Text>
+      </View>
+      <View style={styles.newLegendItem}>
+        <View style={[styles.newCircle, { backgroundColor: '#c0b4b4' }]} />
+        <Text style={styles.newLegendText}>Sugar ({textAvgIntakeSugar})</Text>
+      </View>
+      <View style={styles.newLegendItem}>
+        <View style={[styles.newCircle, { backgroundColor: '#000000' }]} />
+        <Text style={styles.newLegendText}>Sodium ({textAvgIntake})</Text>
+      </View>
+      <View style={styles.newTotalBox}>
+        <Text style={styles.newTotalText}>
+          Total Nutrient{'\n'}Amount = {totalAvgIntake}
+        </Text>
+      </View>
+    </View>
+  </View>
+</View>
+      
     </ThemedView>
+    <TouchableOpacity style={styles.checkButton} onPress={handleCheck}>
+              <ThemedText style={styles.checkMark}>✓</ThemedText>
+            </TouchableOpacity>
     </SafeAreaView>
   );
 }
@@ -260,8 +329,6 @@ const styles = StyleSheet.create({
     alignSelf: "flex-start"
   },
   detailBox: {
-    marginTop: 20,
-    marginHorizontal: 10,
     width: screenWidth - 32,
     backgroundColor: 'white',
     borderRadius: 12,
@@ -276,7 +343,6 @@ const styles = StyleSheet.create({
   row: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginVertical: 2,
   },
   legendCol1: {
     flex: 1,
@@ -321,7 +387,7 @@ const styles = StyleSheet.create({
   itemText: {
     fontSize: 14,
     color: '#333',
-    marginRight: 4,
+    marginRight: 2,
     fontWeight: 'bold',
   },
   icon: {
@@ -362,7 +428,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   newBox: {
-    marginTop: 20,
+    marginTop: 14,
     marginHorizontal: 10,
     width: screenWidth - 32,
     backgroundColor: 'white',
@@ -421,5 +487,21 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#333',
     textAlign: 'left'
+  },
+  checkButton: {
+    position: 'absolute',
+    bottom: 35,
+    right: 20,
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: '#333',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  checkMark: {
+    fontSize: 25,
+    color: '#9AB106',
+    fontWeight: 'bold',
   },
 });

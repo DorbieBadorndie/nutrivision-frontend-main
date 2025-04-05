@@ -23,7 +23,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
-type HomeScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Index'>;
+type HomeScreenNavigationProp = StackNavigationProp<RootStackParamList, 'index'>;
 
 export default function HomeScreen() {
   // ======== AGE STATE ========

@@ -1,7 +1,7 @@
 import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
-import Index from '@/app/index'; // adjust the path if needed
+import index from '@/app/index'; // adjust the path if needed
 import Page6 from '@/app/page-6'; // adjust the path if needed
 import { RootStackParamList } from '@/types/types'; // adjust the path if needed
 import UserNutrientPage from '@/app/nutrient-page';

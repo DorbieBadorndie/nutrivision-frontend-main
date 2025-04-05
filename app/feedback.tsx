@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
+import { useFocusEffect } from '@react-navigation/native';
 import { 
   View, 
   Image, 
@@ -22,13 +23,19 @@ import * as MediaLibrary from 'expo-media-library';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
-type HomeScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Index'>;
+type HomeScreenNavigationProp = StackNavigationProp<RootStackParamList, 'index'>;
 
+type sugar = {sugar: number, approxSugar: number, sugarTablespoon: number}
+type sodium = {sodium: number, approxSodium: number, sodiumTablespoon: number}
+type calories = {calories: number, approxCalories: number, caloriesTablepoon: number}
 
 function Feedback() {
     const navigation = useNavigation() as HomeScreenNavigationProp;
-      const [capturedPhotos, setCapturedPhotos] = useState<{ uri: string; type: string; orientation: string }[]>([]);
-      const [mediaLibraryPermission, setMediaLibraryPermission] = useState<boolean | null>(null);
+    const [capturedPhotos, setCapturedPhotos] = useState<{ uri: string; type: string; orientation: string }[]>([]);
+    const [mediaLibraryPermission, setMediaLibraryPermission] = useState<boolean | null>(null);
+    const [sugar, setSugar] = useState<sugar>({sugar: 0, approxSugar: 0, sugarTablespoon: 0});
+    const [sodium, setSodium] = useState<sodium>({sodium: 0, approxSodium: 0, sodiumTablespoon: 0});
+    const [calories, setCalories] = useState<calories>({calories: 0, approxCalories: 0, caloriesTablepoon: 0});
     // Request media library permissions on mount
       useEffect(() => {
         (async () => {
@@ -38,11 +45,18 @@ function Feedback() {
       }, []);
     
       // Load previously captured photos on mount
-      useEffect(() => {
-        if (mediaLibraryPermission) {
-          loadRecentPhotos();
-        }
-      }, [mediaLibraryPermission]);
+      useFocusEffect(
+        useCallback(() => {
+          if (mediaLibraryPermission) {
+            loadRecentPhotos();
+          }
+      
+          return () => {
+            // Optional: reset or cancel something if needed
+            console.log('Leaving the screen');
+          };
+        }, [mediaLibraryPermission])
+      );
     
       const loadRecentPhotos = async () => {
         try {
@@ -83,7 +97,18 @@ function Feedback() {
     
 
     const handleCheck = () => {
-        navigation.navigate('Index');
+        navigation.navigate('index');
+      };
+
+      const ImageLoop = () => {
+        return (
+          <View style={styles.rightContainer}> 
+            <Image
+              source={require('@/assets/images/1 green.png')}
+              style={styles.image}
+            />
+          </View>
+        );
       };
       
     return (
@@ -121,6 +146,7 @@ function Feedback() {
                                     ) : (
                                         <View style={styles.thumbnail}>
                                         <Text style={styles.placeholderText}>No Image</Text>
+
                                         </View>
                                     )}
                                     </View>
@@ -128,194 +154,201 @@ function Feedback() {
                                 </ScrollView>
                             </View>
                         </View>
-                          
-                    </View>
-                </ScrollView>
+
+                        {/* sugar table */}
+                        <View style={styles.sugarContainer}>
+                         <View style={styles.textContainer}>
+                          <Text style={styles.textHeader}>
+                            Sugar: {sugar.sugar} g
+                          </Text>
+                          <Text style={styles.textSubHeader}>
+                            Approx Sugar: {sugar.approxSugar} grams
+                          </Text>
+                          <Text style={styles.textSubHeader}>
+                            Equivalent to: {sugar.sugarTablespoon} tablespoons
+                          </Text>
+                          </View>
+                          <ImageLoop />
+                        </View>
+                        {/* sodium table */}
+                        <View style={styles.sugarContainer}>
+                          <View style={styles.textContainer}>
+                          <Text style={styles.textHeader}>
+                            Sodium: {sodium.sodium} g
+                          </Text>
+                          <Text style={styles.textSubHeader}>
+                            Approx Sodium: {sodium.approxSodium} grams
+                          </Text>
+                          <Text style={styles.textSubHeader}>
+                            Equivalent to: {sodium.approxSodium} tablespoons
+                          </Text>
+                          </View>
+                          <ImageLoop />
+                      </View>  
+                      {/* calories table */}
+                      <View style={styles.sugarContainer}>
+                          <View style={styles.textContainer}>
+                          <Text style={styles.textHeader}>
+                            Calories: {calories.calories} g
+                          </Text>
+                          <Text style={styles.textSubHeader}>
+                            Approx calories: {calories.approxCalories} grams
+                          </Text>
+                          <Text style={styles.textSubHeader}>
+                            Equivalent to: {calories.caloriesTablepoon} tablespoons
+                          </Text>
+                          </View>
+                          <ImageLoop />
+                      </View>  
+                      </View>
+                                                        
+                </ScrollView>                
             </KeyboardAvoidingView>
             <TouchableOpacity style={styles.checkButton} onPress={handleCheck}>
-                <ThemedText style={styles.checkMark}>
                     <Image 
                         source={require('@/assets/images/Home.png')} 
                         style={{ width: 30, height: 30 }} // Adjust the size as needed
                     />
-                </ThemedText>
             </TouchableOpacity>
         </SafeAreaView>
     );
 }
 
 const styles = StyleSheet.create({
-    keyboardAvoidingContainer: {
-        flex: 1,
-    },
-    safeContainer: {
-        flex: 1,
-        backgroundColor: '#F5F5F5',
-    },
-    scrollContainer: {
-        flexGrow: 1,
-        paddingBottom: 100, // Add space for floating button
-    },
-    container: {
-      flex: 1,
-      backgroundColor: '#F5F5F5',
-      paddingHorizontal: 20,
-    },
-    header: {
-      marginLeft: -15,
-      width: '100%',
-      height: 100,
-      justifyContent: 'center',
-      alignItems: 'flex-start',
-      marginBottom: 10,
-    },
-    logo: {
-      width: 200,
-      height: 150,
-    },
-    userIntakeCard: {
-      marginTop: -15,
-      backgroundColor: 'white',
-      padding: 15,
-      borderRadius: 12,
+  keyboardAvoidingContainer: {
+    flex: 1,
+  },
+  image: {
+    width: SCREEN_WIDTH * 0.35, // Responsive width (25% of screen)
+    height: 50,
+    resizeMode: 'contain',
+    backgroundColor: 'white',
+  },
+  rightContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingRight: 5,
+    backgroundColor: 'white'
+  },
+  sugarContainer: {
+    flexDirection: 'row',
+    width: SCREEN_WIDTH * 0.9,
+    height: 70,
+    paddingVertical: 10,
+    borderRadius: 10,
+    justifyContent: 'space-between', // Changed from 'center' to better distribute content
+    alignItems: 'center', // Added to vertically center items
+    backgroundColor: 'white', // Match the container background color
+    // Use platform-specific styling for consistent shadows
+    ...Platform.select({
+    ios: {
       shadowColor: '#000',
       shadowOffset: { width: 0, height: 2 },
       shadowOpacity: 0.1,
       shadowRadius: 6,
-      elevation: 4,
-      flexDirection: 'row',
-      alignSelf: 'flex-start',
-      marginBottom: 20,
     },
-    userText: {
-      color: '#9AB206',
-      fontSize: 16,
-      fontWeight: 'bold',
-      fontFamily: 'SpaceMono-Regular',
-    },
-    intakeText: {
-      color: '#4D4444',
-      fontSize: 16,
-      fontWeight: 'bold',
-      fontFamily: 'SpaceMono-Regular',
-    },
-    thumbnailSection: {
-      backgroundColor: 'white',
-      borderRadius: 12,
-      padding: 15,
-      shadowColor: '#000',
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.1,
-      shadowRadius: 6,
-      elevation: 4,
-      marginBottom: 20,
-    },
-    thumbnailWrapper: {
-      width: '100%',
-    },
-    thumbnailsRow: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      paddingVertical: 5,
-    },
-    thumbnailContainer: {
-      width: 60,
-      height: 60,
-      marginHorizontal: 5,
-      borderRadius: 12,
-      borderWidth: 1,
-      borderColor: '#DDDDDD',
-      overflow: 'hidden',
-    },
-    thumbnail: {
-      width: '100%',
-      height: '100%',
-    },
-    placeholderText: {
-      color: 'gray',
-      fontSize: 10,
-      textAlign: 'center',
-      marginTop: 20
-    },
-    inputSection: {
-      backgroundColor: 'white',
-      borderRadius: 12,
-      padding: 10,
-      shadowColor: '#000',
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.1,
-      shadowRadius: 6,
+    android: {
       elevation: 4,
     },
-    inputRow: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      marginVertical: 7.5,
-      marginHorizontal: 8,
-    },
-    icon: {
-      width: 24,
-      height: 24,
-      marginRight: 10,
-    },
-    nutrientText: {
-      fontSize: 14,
-      fontWeight: 'bold',
-      color: '#4D4444',
-    },
-    editIcon: {
-      width: 13,
-      height: 13,
-    },
-    editButtonInside: {
-      position: 'absolute',
-      right: 5,
-      top: '50%',
-      transform: [{ translateY: -8 }], // Center vertically (half of icon height)
-    },
-    inputBox: {
-      backgroundColor: '#F0F0F0',
-      borderRadius: 8,
-      width: 80,
-      height: 40,
-      justifyContent: 'center',
-      position: 'relative', // Added to position the edit icon inside
-    },
-    inputText: {
-      fontSize: 14,
-      color: '#333',
-      textAlign: 'center',
-    },
-    input: {
-      width: '100%',
-      height: '100%',
-      fontSize: 14,
-      color: '#333',
-      padding: 0,
-      textAlign: 'center',
-    },
-    divider: {
-      height: 1,
-      backgroundColor: '#DDDDDD',
-      flex: 1, // Makes it take up available space
-      marginHorizontal: 10,
-    },
-    checkButton: {
-      position: 'absolute',
-      bottom: 40,
-      right: 20,
-      width: 60,
-      height: 60,
-      borderRadius: 30,
-      backgroundColor: '#333',
-      justifyContent: 'center',
-      alignItems: 'center',
-    },
-    checkMark: {
-      fontSize: 25,
-      color: '#9AB206',
-      fontWeight: 'bold',
-    },
-  });
+    }),
+    paddingHorizontal: 15, // Add some horizontal padding
+    marginBottom: 15, // Add some margin between items
+  },
+  textHeader: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#4D4444',
+    paddingBottom: 1,
+    paddingLeft: -5,
+  },
+  textContainer: {
+    flex: 1, // Take available space
+    backgroundColor: 'white'
+  },
+  textSubHeader: {
+    fontSize: 12,
+    color: '#9D9696',
+    paddingLeft: -5,
+  },
+  safeContainer: {
+    flex: 1,
+    backgroundColor: '#F5F5F5',
+  },
+  scrollContainer: {
+    flexGrow: 1,
+    paddingBottom: 100, // Add space for floating button
+  },
+  container: {
+    flex: 1,
+    backgroundColor: '#F5F5F5',
+    paddingHorizontal: 20,
+  },
+  header: {
+    marginLeft: -15,
+    width: '100%',
+    height: 100,
+    justifyContent: 'center',
+    alignItems: 'flex-start',
+    marginBottom: 10,
+  },
+  logo: {
+    width: 200,
+    height: 150,
+  },
+  thumbnailSection: {
+    backgroundColor: 'white',
+    borderRadius: 12,
+    padding: 15,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 6,
+    elevation: 4,
+    marginBottom: 20,
+  },
+  thumbnailWrapper: {
+    width: '100%',
+  },
+  thumbnailsRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 5,
+  },
+  thumbnailContainer: {
+    width: 60,
+    height: 60,
+    marginHorizontal: 5,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#DDDDDD',
+    overflow: 'hidden',
+  },
+  thumbnail: {
+    width: '100%',
+    height: '100%',
+  },
+  placeholderText: {
+    color: 'gray',
+    fontSize: 10,
+    textAlign: 'center',
+    marginTop: 20,
+  },
+  checkButton: {
+    position: 'absolute',
+    bottom: 40,
+    right: 20,
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: '#333',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  checkMark: {
+    fontSize: 25,
+    color: '#9AB206',
+    fontWeight: 'bold',
+  },
+});
 
 export default Feedback;

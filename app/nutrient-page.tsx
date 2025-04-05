@@ -26,7 +26,7 @@ const { width, height } = Dimensions.get('window');
 const toPercentageText = (value: number): string => `${value}%`;
 const formatValue = (value: number, unit: string = 'g'): string => `${value} ${unit}`;
 
-type HomeScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Index'>;
+type HomeScreenNavigationProp = StackNavigationProp<RootStackParamList, 'index'>;
 
 export default function UserNutrientPage() {
   const [fontsLoaded] = useFonts({
@@ -161,7 +161,6 @@ export default function UserNutrientPage() {
                 <Image 
                   source={require('@/assets/images/NutriVision.png')} 
                   style={styles.logo}
-                  resizeMode="contain"
                 />
               </View>
               
@@ -363,6 +362,7 @@ const styles = StyleSheet.create({
   logo: {
     width: 200,
     height: 150,
+    resizeMode: 'contain',
   },
   userIntakeCard: {
     marginTop: -15,

@@ -72,39 +72,39 @@ import React, { useRef, useState, useEffect } from 'react';
 
     const handleTakePhoto = async () => {
       if (cameraRef.current) {
-        const options = {
-          quality: 1,
-          base64: true,
-          exif: false,
-        };
+        const options = { quality: 1, base64: true, exif: false };
         const takenPhoto = await cameraRef.current.takePictureAsync(options);
-        
-        // Crop area based on guide box proportions (vertical only)
-        const guideBoxWidth = takenPhoto.width * 0.8;  // 80% width
-        const guideBoxHeight = takenPhoto.height * 0.3; // 30% height
-        const originX = (takenPhoto.width - guideBoxWidth) / 2;
-        const originY = (takenPhoto.height - guideBoxHeight) / 2;
-        
-        const croppedPhoto = await ImageManipulator.manipulateAsync(
-          takenPhoto.uri,
-          [
-            {
-              crop: {
-                originX,
-                originY,
-                width: guideBoxWidth,
-                height: guideBoxHeight,
+    
+        if (isLabelMode) {
+          // Label mode - crop the image according to guide box
+          const cropWidth = takenPhoto.width * 0.7;  // 70% width
+          const cropHeight = takenPhoto.height * 0.6; // 60% height
+          const originX = (takenPhoto.width - cropWidth) / 2;
+          const originY = (takenPhoto.height - cropHeight) / 2 - (takenPhoto.height * 0.25); // Adjust for marginBottom
+    
+          const croppedPhoto = await ImageManipulator.manipulateAsync(
+            takenPhoto.uri,
+            [
+              {
+                crop: {
+                  originX,
+                  originY,
+                  width: cropWidth,
+                  height: cropHeight,
+                },
               },
-            },
-          ],
-          { compress: 1, format: ImageManipulator.SaveFormat.JPEG }
-        );
-        
-        // Add orientation and photo type info
-        croppedPhoto.orientation = boxOrientation; // 'vertical'
-        croppedPhoto.type = isLabelMode ? 'label' : 'fruit';
-
-        setPhoto(croppedPhoto);
+            ],
+            { compress: 1, format: ImageManipulator.SaveFormat.JPEG }
+          );
+    
+          croppedPhoto.orientation = 'vertical';
+          croppedPhoto.type = 'label';
+          setPhoto(croppedPhoto);
+        } else {
+          // Fruit mode - use the full image
+          takenPhoto.type = 'fruit';
+          setPhoto(takenPhoto);
+        }
       }
     };
 
@@ -213,11 +213,11 @@ import React, { useRef, useState, useEffect } from 'react';
         </View>
 
         <CameraView style={styles.camera} facing={facing} ref={cameraRef}>
-          {/* Removed Flash Button */}
-
-          {/* Overlay + guide box (always vertical) */}
+          {/* Overlay + guide box (only in label mode) */}
           <View style={styles.overlay}>
-            <View style={[styles.guideBox, isLabelMode ? styles.labelGuideBox : styles.fruitGuideBox]} />
+            {isLabelMode && (
+              <View style={[styles.guideBox, styles.labelGuideBox]} />
+            )}
           </View>
 
           {/* Bottom Controls: Left = Back, Center = Capture, Right = Submit (disabled if no photo) */}
@@ -326,6 +326,9 @@ import React, { useRef, useState, useEffect } from 'react';
     },
     labelGuideBox: {
       borderColor: '#f5dd4b', // Yellow
+      width: '70%',
+      height: '60%',
+      marginBottom: '50%'
     },
     fruitGuideBox: {
       borderColor: '#81b0ff', // Blue
@@ -334,7 +337,7 @@ import React, { useRef, useState, useEffect } from 'react';
     // Bottom "Labels/Fruits" switch
     modeSelectorBottom: {
       position: 'absolute',
-      bottom: 200, // Increase this value to move it higher up
+      bottom: 150, // Increase this value to move it higher up
       left: 0,
       right: 0,
       backgroundColor: 'transparent',
@@ -346,9 +349,9 @@ import React, { useRef, useState, useEffect } from 'react';
       alignItems: 'center',
       justifyContent: 'center',
       backgroundColor: 'rgba(0,0,0,0.6)',
-      paddingVertical: 8,
-      // paddingHorizontal: 50,
-      borderRadius: 20,
+      paddingVertical: 10,
+      paddingHorizontal: 20,
+      borderRadius: 25,
     },
     switchLabel: {
       color: '#999',

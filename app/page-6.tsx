@@ -426,7 +426,7 @@ const styles = StyleSheet.create({
   measurementTextDown: {
     fontSize: 12,
     color: '#9AB106',
-    marginTop: -5,
+    marginTop: -8,
     fontWeight: 'bold',
   },
   newBox: {

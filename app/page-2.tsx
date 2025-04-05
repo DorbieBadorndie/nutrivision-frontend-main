@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, View, Image, Dimensions, SafeAreaView, Text } from 'react-native';
+import { StyleSheet, View, Image, Dimensions, SafeAreaView, Text, TouchableOpacity } from 'react-native';
 import { ThemedView } from '@/components/ThemedView';
 import { ThemedText } from '@/components/ThemedText';
 import { CircularProgressbar } from 'react-circular-progressbar';
@@ -16,6 +16,9 @@ type Page2ScreenNavigationProp = StackNavigationProp<RootStackParamList, 'page-2
 export default function Page2() {
   const navigation = useNavigation<Page2ScreenNavigationProp>();
   const { width } = Dimensions.get('window');
+  const handleCheck = () => {
+    navigation.navigate('page-6');
+  };
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -51,7 +54,7 @@ export default function Page2() {
   <AnimatedCircularProgress style={{ transform: [{ rotate: '90deg' }, { scaleX: -1 }] }}
     size={95}
     width={10}
-    fill={40} // Percentage fill
+    fill={100} // Percentage fill
     tintColor="#d5cd3a"
     backgroundColor="#dddddd"
   >
@@ -92,7 +95,7 @@ export default function Page2() {
   <AnimatedCircularProgress style={{ transform: [{ rotate: '90deg' }, { scaleX: -1 }] }}
     size={95}
     width={10}
-    fill={53} // Percentage fill
+    fill={100} // Percentage fill
     tintColor="#aa7b08"
     backgroundColor="#dddddd"
   >
@@ -131,7 +134,7 @@ export default function Page2() {
   <AnimatedCircularProgress style={{ transform: [{ rotate: '90deg' }, { scaleX: -1 }] }}
     size={95}
     width={10}
-    fill={70} // Percentage fill
+    fill={100} // Percentage fill
     tintColor="#9ab106"
     backgroundColor="#dddddd"
   >
@@ -155,7 +158,15 @@ export default function Page2() {
     </View>
       </View>
     </View>
+    <View style={styles.paragraphContainer}>
+  <Text style={styles.paragraphText}>
+    The information provided by Nutrivision is for educational and informational purposes only. It is not intended as medical advice, diagnosis, or treatment. Nutrient values are estimated based on available data and may not reflect exact amounts due to variations in food composition and labeling. While we strive for accuracy, individual nutritional needs may differ. Always consult a healthcare professional or registered dietitian for personalized dietary recommendations and health-related decisions.
+  </Text>
+</View>
       </ThemedView>
+      <TouchableOpacity style={styles.checkButton} onPress={handleCheck}>
+                    <ThemedText style={styles.checkMark}>✓</ThemedText>
+                  </TouchableOpacity>
     </SafeAreaView>
   );
 }
@@ -165,10 +176,26 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#eff1f6',
   },
+  checkButton: {
+    position: 'absolute',
+    bottom: 40,
+    right: 20,
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: '#333',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  checkMark: {
+    fontSize: 25,
+    color: '#9AB106',
+    fontWeight: 'bold',
+  },
   container: {
     flex: 1,
     backgroundColor: '#eff1f6',
-    gap: 10,
+    gap: 15,
     padding: 15
   },
   // Logo style from original
@@ -238,4 +265,23 @@ textRow: {
 },
   progressRow: {
   },
+  paragraphContainer: {
+  backgroundColor: 'white',
+  borderRadius: 8,
+  padding: 15,
+  marginTop: 10,
+  shadowColor: '#000',
+  shadowOffset: { width: 0, height: 2 },
+  shadowOpacity: 0.1,
+  shadowRadius: 6,
+  elevation: 4,
+},
+
+paragraphText: {
+  fontSize: 16,
+  color: '#333',
+  lineHeight: 26,
+  textAlign: 'justify',
+},
+
 });

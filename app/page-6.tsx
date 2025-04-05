@@ -39,7 +39,7 @@ export default function Page6() {
       calories: { user: 180, avg: 147 },
     },
     intake: { 
-      breakdown: { calories: 33, sugar: 45, sodium: 22 },
+      breakdown: { calories: 22, sugar: 45, sodium: 22 },
       total: 209
     }
   });
@@ -362,9 +362,6 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   newBox: {
-    marginTop: 20,
-    marginHorizontal: 10,
-    width: screenWidth - 32,
     backgroundColor: 'white',
     borderRadius: 12,
     padding: 10,

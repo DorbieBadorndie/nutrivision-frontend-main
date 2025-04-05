@@ -47,15 +47,30 @@ export default function Page2() {
     
       <View style={styles.textRow}> 
         <View style={styles.progressRow}>
-      <View style={{ alignItems: 'flex-start' , marginTop: 5 }}>
-      <AnimatedCircularProgress
-        size={95}
-        width={10}
-        fill={20} // Percentage fill
-        tintColor="#d5cd3a"
-        backgroundColor="#dddddd"
-      />
-    </View>
+      <View style={{ alignItems: 'flex-start', marginTop: 10}}>
+  <AnimatedCircularProgress style={{ transform: [{ rotate: '90deg' }, { scaleX: -1 }] }}
+    size={95}
+    width={10}
+    fill={40} // Percentage fill
+    tintColor="#d5cd3a"
+    backgroundColor="#dddddd"
+  >
+    {
+      () => (
+        <Image 
+          source={require('@/assets/images/Sugar Icon.png')} // Change this to your desired image
+          style={{ 
+            width: 40,
+            height: 40,
+            borderRadius: 20,
+            transform: [{ rotate: '450deg' }, { scaleX: 1 }],
+          }}
+          resizeMode="contain"
+        />
+      )
+    }
+  </AnimatedCircularProgress>
+</View>
   </View>
     </View>
 
@@ -64,11 +79,80 @@ export default function Page2() {
       {/* Container 2 */}
       <View style={[styles.column]}>
         {/* Your content */}
+        {<View style={styles.textRow}>
+        <Text style={styles.title}>15g</Text>
+        </View>}
+        <View style={styles.textRow}>
+        <Text style={styles.subtitle}>Sodium</Text>
+        </View>
+        {/* Circular Progress with Image */}
+        <View style={styles.textRow}> 
+        <View style={styles.progressRow}>
+      <View style={{ alignItems: 'flex-start', marginTop: 10}}>
+  <AnimatedCircularProgress style={{ transform: [{ rotate: '90deg' }, { scaleX: -1 }] }}
+    size={95}
+    width={10}
+    fill={53} // Percentage fill
+    tintColor="#aa7b08"
+    backgroundColor="#dddddd"
+  >
+    {
+      () => (
+        <Image 
+          source={require('@/assets/images/Sodium Icon.png')} // Change this to your desired image
+          style={{ 
+            width: 40,
+            height: 40,
+            borderRadius: 20,
+            transform: [{ rotate: '450deg' }, { scaleX: 1 }],
+          }}
+          resizeMode="contain"
+        />
+      )
+    }
+  </AnimatedCircularProgress>
+</View>
+  </View>
+    </View>
       </View>
 
       {/* Container 3 */}
       <View style={[styles.column,]}>
         {/* Your content */}
+        {<View style={styles.textRow}>
+        <Text style={styles.title}>16g</Text>
+        </View>}
+        <View style={styles.textRow}>
+        <Text style={styles.subtitle}>Calories</Text>
+        </View>
+        <View style={styles.textRow}> 
+        <View style={styles.progressRow}>
+      <View style={{ alignItems: 'flex-start', marginTop: 10}}>
+  <AnimatedCircularProgress style={{ transform: [{ rotate: '90deg' }, { scaleX: -1 }] }}
+    size={95}
+    width={10}
+    fill={70} // Percentage fill
+    tintColor="#9ab106"
+    backgroundColor="#dddddd"
+  >
+    {
+      () => (
+        <Image 
+          source={require('@/assets/images/Cholesterol Icon.png')} // Change this to your desired image
+          style={{ 
+            width: 40,
+            height: 40,
+            borderRadius: 20,
+            transform: [{ rotate: '450deg' }, { scaleX: 1 }],
+          }}
+          resizeMode="contain"
+        />
+      )
+    }
+  </AnimatedCircularProgress>
+</View>
+  </View>
+    </View>
       </View>
     </View>
       </ThemedView>
@@ -103,7 +187,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#333',
+    color: '#385802',
   },
   subtitle: {
     fontSize: 12,

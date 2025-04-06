@@ -57,6 +57,7 @@ export default function UserNutrientPage() {
       total: number;
     };
   }
+  
 
   const [nutritionData, setNutritionData] = useState<NutritionData>({
       userIntake: { 
@@ -289,38 +290,44 @@ export default function UserNutrientPage() {
                 </View>
               </View>
 
-              {/* Donut Chart Boxes */}
-              <View key='User Intake' style={styles.newBox}>
-                <View style={styles.innerRow}>
-                  <View style={styles.newLeftColumn}>
-                    <PieChart
-                      widthAndHeight={170}
-                      series={donutSeries}
-                      cover={0.55}
-                    />
+              <View style={styles.chartsContainer}>
+            {/* User Intake Donut Chart */}
+            <View style={styles.chartBox}>
+              <View style={styles.chartRow}>
+                <View style={styles.chartWrapper}>
+                  <PieChart
+                    widthAndHeight={150}
+                    series={[
+                      { value: nutritionData.userIntake.breakdown.sodium, color: '#000000' },
+                      { value: nutritionData.userIntake.breakdown.sugar, color: '#c0b4b4' },
+                      { value: nutritionData.userIntake.breakdown.calories, color: '#7ca844' },
+                    ]}
+                    cover={0.55}
+                  />
+                </View>
+                <View style={styles.legendWrapper}>
+                  <Text style={styles.chartTitle}>User Intake</Text>
+                  <View style={styles.legendItem}>
+                    <View style={[styles.colorCircle, { backgroundColor: '#7ca844' }]} />
+                    <Text style={styles.legendLabel}>Calories ({toPercentageText(nutritionData.userIntake.breakdown.calories)})</Text>
                   </View>
-                  <View style={styles.newRightColumn}>
-                    <Text style={styles.newLegendTitle}>{'User Intake'}</Text>
-                    <View style={styles.newLegendItem}>
-                      <View style={[styles.newCircle, { backgroundColor: '#7ca844' }]} />
-                      <Text style={styles.newLegendText}>Calories ({textUserIntakeCalories})</Text>
-                    </View>
-                    <View style={styles.newLegendItem}>
-                      <View style={[styles.newCircle, { backgroundColor: '#c0b4b4' }]} />
-                      <Text style={styles.newLegendText}>Sugar ({textUserIntakeSugar})</Text>
-                    </View>
-                    <View style={styles.newLegendItem}>
-                      <View style={[styles.newCircle, { backgroundColor: '#000000' }]} />
-                      <Text style={styles.newLegendText}>Sodium ({textUserIntake})</Text>
-                    </View>
-                    <View style={styles.newTotalBox}>
-                      <Text style={styles.newTotalText}>
-                        Total Nutrient{'\n'}Amount = {totalUserIntake}
-                      </Text>
-                    </View>
+                  <View style={styles.legendItem}>
+                    <View style={[styles.colorCircle, { backgroundColor: '#c0b4b4' }]} />
+                    <Text style={styles.legendLabel}>Sugar ({toPercentageText(nutritionData.userIntake.breakdown.sugar)})</Text>
+                  </View>
+                  <View style={styles.legendItem}>
+                    <View style={[styles.colorCircle, { backgroundColor: '#000000' }]} />
+                    <Text style={styles.legendLabel}>Sodium ({toPercentageText(nutritionData.userIntake.breakdown.sodium)})</Text>
+                  </View>
+                  <View style={styles.totalBox}>
+                    <Text style={styles.totalText}>
+                      Total Nutrient{'\n'}Amount = {formatValue(nutritionData.userIntake.total)}
+                    </Text>
                   </View>
                 </View>
               </View>
+            </View>
+          </View>
             </View>
           </ScrollView>
       </KeyboardAvoidingView>
@@ -437,6 +444,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 6,
     elevation: 4,
+    marginBottom: 20,
   },
   inputRow: {
     flexDirection: 'row',
@@ -491,19 +499,6 @@ const styles = StyleSheet.create({
     flex: 1, // Makes it take up available space
     marginHorizontal: 10,
   },
-  newBox: {
-    marginTop: 20,
-    marginHorizontal: 10,
-    width: screenWidth - 32,
-    backgroundColor: 'white',
-    borderRadius: 12,
-    padding: 10,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 6,
-    elevation: 4,
-  },
   innerRow: {
     flexDirection: 'row',
   },
@@ -552,7 +547,66 @@ const styles = StyleSheet.create({
     color: '#333',
     textAlign: 'left'
   },
-
+  chartsContainer: {
+    gap: 16,
+  },
+  chartBox: {
+    backgroundColor: 'white',
+    borderRadius: 12,
+    padding: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 6,
+    elevation: 4,
+  },
+  chartRow: {
+    flexDirection: 'row',
+  },
+  chartWrapper: {
+    position: 'relative',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  legendWrapper: {
+    flex: 1,
+    justifyContent: 'center',
+    paddingLeft: 16,
+  },
+  legendItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 4,
+  },
+  legendItemSpacing: {
+    marginLeft: 24, // Additional spacing for the second legend
+  },
+  chartTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 12,
+  },
+  colorCircle: {
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    marginHorizontal: 12,
+  },
+  legendLabel: {
+    fontSize: 14,
+    color: '#333',
+  },
+  totalBox: {
+    backgroundColor: '#f8e4e4',
+    padding: 12,
+    borderRadius: 12,
+    marginTop: 12,
+  },
+  totalText: {
+    fontSize: 14,
+    color: '#333',
+    textAlign: 'left',
+  },
   checkButton: {
     position: 'absolute',
     bottom: 40,

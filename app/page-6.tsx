@@ -3,11 +3,11 @@ import {
   StyleSheet, 
   View, 
   Image, 
-  Dimensions, 
   Text, 
   SafeAreaView, 
   TouchableOpacity,
-  ScrollView
+  ScrollView,
+  DimensionValue
 } from 'react-native';
 import { ThemedView } from '@/components/ThemedView';
 import { ThemedText } from '@/components/ThemedText';
@@ -16,7 +16,7 @@ import { useNavigation } from '@react-navigation/native';
 import { RootStackParamList } from '@/types/types';
 import { StackNavigationProp } from '@react-navigation/stack';
 
-const toProgressWidth = (value: number) => `${Math.min(value, 100)}%`;
+const toProgressWidth = (value: number) => `${Math.min(value, 100)}%` as DimensionValue;
 const toPercentageText = (value: number) => `${value}%`;
 const formatValue = (value: number, unit: string = 'g') => `${value} ${unit}`;
 
@@ -86,10 +86,13 @@ export default function Page6() {
         <ThemedView style={styles.contentContainer}>
           {/* Progress Bars Section */}
           <View style={styles.progressContainer}>
-            <View style={styles.legendsRow}>
-              <View style={styles.legendProgress}>
+            {/* Legends - Now properly spaced */}
+            <View style={styles.legendsContainer}>
+              <View style={styles.legendItem}>
                 <View style={[styles.legendSquare, styles.userLegend]} />
                 <Text style={styles.legendText}>User input</Text>
+              </View>
+              <View style={[styles.legendItem, styles.legendItemSpacing]}>
                 <View style={[styles.legendSquare, styles.avgLegend]} />
                 <Text style={styles.legendText}>Average intake</Text>
               </View>
@@ -102,8 +105,10 @@ export default function Page6() {
                 <Image source={require('@/assets/images/Sugar Icon.png')} style={styles.icon} />
               </View>
               <View style={styles.progressBars}>
-                <View style={styles.progressBarContainer}>
+                <View style={styles.progressBarBackground}>
                   <View style={[styles.progressBar, styles.userProgress, { width: toProgressWidth(nutritionData.progress.sugar.user) }]} />
+                </View>
+                <View style={styles.progressBarBackground}>
                   <View style={[styles.progressBar, styles.avgProgress, { width: toProgressWidth(nutritionData.progress.sugar.avg) }]} />
                 </View>
               </View>
@@ -120,8 +125,10 @@ export default function Page6() {
                 <Image source={require('@/assets/images/Sodium Icon.png')} style={styles.icon} />
               </View>
               <View style={styles.progressBars}>
-                <View style={styles.progressBarContainer}>
+                <View style={styles.progressBarBackground}>
                   <View style={[styles.progressBar, styles.userProgress, { width: toProgressWidth(nutritionData.progress.sodium.user) }]} />
+                </View>
+                <View style={styles.progressBarBackground}>
                   <View style={[styles.progressBar, styles.avgProgress, { width: toProgressWidth(nutritionData.progress.sodium.avg) }]} />
                 </View>
               </View>
@@ -138,8 +145,10 @@ export default function Page6() {
                 <Image source={require('@/assets/images/Cholesterol Icon.png')} style={styles.icon} />
               </View>
               <View style={styles.progressBars}>
-                <View style={styles.progressBarContainer}>
+                <View style={styles.progressBarBackground}>
                   <View style={[styles.progressBar, styles.userProgress, { width: toProgressWidth(nutritionData.progress.calories.user) }]} />
+                </View>
+                <View style={styles.progressBarBackground}>
                   <View style={[styles.progressBar, styles.avgProgress, { width: toProgressWidth(nutritionData.progress.calories.avg) }]} />
                 </View>
               </View>
@@ -167,16 +176,16 @@ export default function Page6() {
                   />
                 </View>
                 <View style={styles.legendWrapper}>
-                  <Text style={styles.chartTitle}>USER INTAKE</Text>
-                  <View style={styles.legendPie}>
+                  <Text style={styles.chartTitle}>User Intake</Text>
+                  <View style={styles.legendItem}>
                     <View style={[styles.colorCircle, { backgroundColor: '#7ca844' }]} />
                     <Text style={styles.legendLabel}>Calories ({toPercentageText(nutritionData.intake.breakdown.calories)})</Text>
                   </View>
-                  <View style={styles.legendPie}>
+                  <View style={styles.legendItem}>
                     <View style={[styles.colorCircle, { backgroundColor: '#c0b4b4' }]} />
                     <Text style={styles.legendLabel}>Sugar ({toPercentageText(nutritionData.intake.breakdown.sugar)})</Text>
                   </View>
-                  <View style={styles.legendPie}>
+                  <View style={styles.legendItem}>
                     <View style={[styles.colorCircle, { backgroundColor: '#000000' }]} />
                     <Text style={styles.legendLabel}>Sodium ({toPercentageText(nutritionData.intake.breakdown.sodium)})</Text>
                   </View>
@@ -204,16 +213,16 @@ export default function Page6() {
                   />
                 </View>
                 <View style={styles.legendWrapper}>
-                  <Text style={styles.chartTitle}>AVERAGE INTAKE</Text>
-                  <View style={styles.legendPie}>
+                  <Text style={styles.chartTitle}>Average Intake</Text>
+                  <View style={styles.legendItem}>
                     <View style={[styles.colorCircle, { backgroundColor: '#7ca844' }]} />
                     <Text style={styles.legendLabel}>Calories ({toPercentageText(nutritionData.avg.breakdown.calories)})</Text>
                   </View>
-                  <View style={styles.legendPie}>
+                  <View style={styles.legendItem}>
                     <View style={[styles.colorCircle, { backgroundColor: '#c0b4b4' }]} />
                     <Text style={styles.legendLabel}>Sugar ({toPercentageText(nutritionData.avg.breakdown.sugar)})</Text>
                   </View>
-                  <View style={styles.legendPie}>
+                  <View style={styles.legendItem}>
                     <View style={[styles.colorCircle, { backgroundColor: '#000000' }]} />
                     <Text style={styles.legendLabel}>Sodium ({toPercentageText(nutritionData.avg.breakdown.sodium)})</Text>
                   </View>
@@ -255,7 +264,6 @@ const styles = StyleSheet.create({
     width: 200,
     height: 60,
     resizeMode: 'contain',
-    alignSelf: "flex-start"
   },
   contentContainer: {
     flex: 1,
@@ -274,20 +282,18 @@ const styles = StyleSheet.create({
     shadowRadius: 6,
     elevation: 4,
   },
-  legendsRow: {
+  legendsContainer: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    justifyContent: 'flex-start',
     marginBottom: 16,
-    paddingHorizontal: 8,
   },
-  legendPie: {
+  legendItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginLeft: 16,
+    marginBottom: 4,
   },
-  legendProgress: {
-    flexDirection: 'row',
-    alignItems: 'center',
+  legendItemSpacing: {
+    marginLeft: 24, // Additional spacing for the second legend
   },
   legendSquare: {
     width: 16,
@@ -328,25 +334,22 @@ const styles = StyleSheet.create({
   progressBars: {
     flex: 3,
   },
-  progressBarContainer: {
+  progressBarBackground: {
     height: 4,
-    backgroundColor: '#eee',
-    borderRadius: 2,
+    backgroundColor: '#EEEEEE', // Grey background for progress bar
+    borderRadius: 3,
+    marginVertical: 2,
     overflow: 'hidden',
-    position: 'relative',
   },
   progressBar: {
-    height: '50%',
-    borderRadius: 2,
-    position: 'absolute',
-    top: 0,
+    height: '100%',
+    borderRadius: 3,
   },
   userProgress: {
     backgroundColor: 'black',
   },
   avgProgress: {
     backgroundColor: '#9AB106',
-    top: '50%',
   },
   valueContainer: {
     flex: 1,
@@ -392,13 +395,12 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
     marginBottom: 12,
-    letterSpacing: 1,
   },
   colorCircle: {
     width: 12,
     height: 12,
     borderRadius: 6,
-    marginRight: 8,
+    marginHorizontal: 12,
   },
   legendLabel: {
     fontSize: 14,

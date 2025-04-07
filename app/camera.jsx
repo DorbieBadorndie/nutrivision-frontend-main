@@ -80,7 +80,7 @@ import React, { useRef, useState, useEffect } from 'react';
           const cropWidth = takenPhoto.width * 0.7;  // 70% width
           const cropHeight = takenPhoto.height * 0.6; // 60% height
           const originX = (takenPhoto.width - cropWidth) / 2;
-          const originY = (takenPhoto.height - cropHeight) / 2 - (takenPhoto.height * 0.25); // Adjust for marginBottom
+          const originY = (takenPhoto.height - cropHeight) / 2;// Adjust for marginBottom
     
           const croppedPhoto = await ImageManipulator.manipulateAsync(
             takenPhoto.uri,
@@ -327,8 +327,7 @@ import React, { useRef, useState, useEffect } from 'react';
     labelGuideBox: {
       borderColor: '#f5dd4b', // Yellow
       width: '70%',
-      height: '60%',
-      marginBottom: '50%'
+      height: '60%'
     },
     fruitGuideBox: {
       borderColor: '#81b0ff', // Blue
@@ -337,7 +336,7 @@ import React, { useRef, useState, useEffect } from 'react';
     // Bottom "Labels/Fruits" switch
     modeSelectorBottom: {
       position: 'absolute',
-      bottom: 150, // Increase this value to move it higher up
+      top: 100, // Increase this value to move it higher up
       left: 0,
       right: 0,
       backgroundColor: 'transparent',

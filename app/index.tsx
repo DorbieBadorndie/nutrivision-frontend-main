@@ -140,7 +140,7 @@ export default function HomeScreen() {
                   renderItem={renderDetailBox}
                   width={SCREEN_WIDTH - 20}
                   height={160}
-                  style={{ alignSelf: 'center' }}
+                  style={{ alignSelf: 'center', overflow: 'visible' }} 
                   onSnapToItem={index => setActiveIndex(index)}
                 />
 
@@ -159,10 +159,10 @@ export default function HomeScreen() {
               <View style={styles.ageContainer}>
                 <View style={styles.leftColumn}>
                   <View style={styles.topLeft}>
-                    <ThemedText style={styles.ageTitle}>Age</ThemedText>
+                    <ThemedText style={styles.containerTitle}>Age</ThemedText>
                   </View>
                   <View style={styles.bottomLeft}>
-                    <ThemedText style={styles.ageSubtitle}>
+                    <ThemedText style={styles.containerSubtitle}>
                       Age affects nutrient intake by changing metabolism, absorption, and dietary needs.
                     </ThemedText>
                   </View>
@@ -208,11 +208,11 @@ export default function HomeScreen() {
               <View style={styles.weightContainer}>
                 <View style={styles.leftColumn}>
                   <View style={styles.topLeft}>
-                    <ThemedText style={styles.ageTitle}>Weight</ThemedText>
+                    <ThemedText style={styles.containerTitle}>Weight</ThemedText>
                   </View>
                   <View style={styles.bottomLeft}>
-                    <ThemedText style={styles.ageSubtitle}>
-                      Weight affects nutrient needs by influencing metabolism and abssadsaaadsorption.
+                    <ThemedText style={styles.containerSubtitle}>
+                      Weight affects nutrient needs by influencing metabolism and absorption.
                     </ThemedText>
                   </View>
                 </View>
@@ -232,7 +232,7 @@ export default function HomeScreen() {
                       <Switch
                         trackColor={{ false: '#e0e0e0', true: '#e0e0e0' }}
                         thumbColor={'#9AB106'}
-                        style={{ transform: [{ scaleX: 0.6 }, { scaleY: 0.6 }] }}
+                        style={styles.switch}
                         value={!isKg}
                         onValueChange={toggleWeightUnit}
                       />
@@ -246,10 +246,10 @@ export default function HomeScreen() {
               <View style={styles.heightContainer}>
                 <View style={styles.leftColumn}>
                   <View style={styles.topLeft}>
-                    <ThemedText style={styles.ageTitle}>Height</ThemedText>
+                    <ThemedText style={styles.containerTitle}>Height</ThemedText>
                   </View>
                   <View style={styles.bottomLeft}>
-                    <ThemedText style={styles.ageSubtitle}>
+                    <ThemedText style={styles.containerSubtitle}>
                       Height affects nutrient needs, growth, and overall development requirements.
                     </ThemedText>
                   </View>
@@ -270,7 +270,7 @@ export default function HomeScreen() {
                       <Switch
                         trackColor={{ false: '#e0e0e0', true: '#e0e0e0' }}
                         thumbColor={'#9AB106'}
-                        style={{ transform: [{ scaleX: 0.6 }, { scaleY: 0.6 }] }}
+                        style={styles.switch}
                         value={!isFt}
                         onValueChange={toggleHeightUnit}
                       />
@@ -314,13 +314,14 @@ const styles = StyleSheet.create({
   },
   carouselDetailBox: {
     backgroundColor: 'white',
+    margin: 4,
     borderRadius: 12,
     padding: 16,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.1,
     shadowRadius: 6,
-    elevation: 4,
+    elevation: 4, 
     flex: 1,
     justifyContent: 'center',
   },
@@ -404,13 +405,13 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  ageTitle: {
+  containerTitle: {
     fontSize: 24,
     fontWeight: 'bold',
     color: '#385802',
     textAlign: 'left',
   },
-  ageSubtitle: {
+  containerSubtitle: {
     fontSize: 10,
     lineHeight: 16,
     color: '#666',
@@ -418,7 +419,6 @@ const styles = StyleSheet.create({
   counterWrapper: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 8,
   },
   counterButton: {
     paddingHorizontal: 6,
@@ -452,7 +452,6 @@ const styles = StyleSheet.create({
   weightInput: {
     height: 36,
     width: 60,
-    marginBottom: 8,
     borderWidth: 1,
     borderColor: '#e0e0e0',
     borderRadius: 15,
@@ -463,14 +462,19 @@ const styles = StyleSheet.create({
     backgroundColor: '#eaeaea',
   },
   switchRow: {
+    width: '20%',
+    flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
-    marginTop: 2,
   },
   switchLabel: {
-    marginHorizontal: 0,
     fontSize: 14,
     color: '#333',
+    textAlign: 'center',
+  },
+  switch: {
+    transform: [{ scaleX: 0.6 }, { scaleY: 0.6 }],
+    
   },
   checkButton: {
     position: 'absolute',

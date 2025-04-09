@@ -158,30 +158,30 @@ function Feedback() {
                         {/* sugar table */}
                         <View style={styles.sugarContainer}>
                          <View style={styles.textContainer}>
-                          <Text style={styles.textHeader}>
-                            Sugar: {sugar.sugar} g
-                          </Text>
-                          <Text style={styles.textSubHeader}>
-                            Approx Sugar: {sugar.approxSugar} grams
-                          </Text>
-                          <Text style={styles.textSubHeader}>
-                            Equivalent to: {sugar.sugarTablespoon} tablespoons
-                          </Text>
+                            <Text style={styles.textHeader}>
+                              Sugar: {sugar.sugar} g
+                            </Text>
+                            <Text style={styles.textSubHeader}>
+                              Approx Sugar: {sugar.approxSugar} grams
+                            </Text>
+                            <Text style={styles.textSubHeader}>
+                              Equivalent to: {sugar.sugarTablespoon} tablespoons
+                            </Text>
                           </View>
                           <ImageLoop />
                         </View>
                         {/* sodium table */}
                         <View style={styles.sugarContainer}>
                           <View style={styles.textContainer}>
-                          <Text style={styles.textHeader}>
-                            Sodium: {sodium.sodium} g
-                          </Text>
-                          <Text style={styles.textSubHeader}>
-                            Approx Sodium: {sodium.approxSodium} grams
-                          </Text>
-                          <Text style={styles.textSubHeader}>
-                            Equivalent to: {sodium.approxSodium} tablespoons
-                          </Text>
+                            <Text style={styles.textHeader}>
+                              Sodium: {sodium.sodium} g
+                            </Text>
+                            <Text style={styles.textSubHeader}>
+                              Approx Sodium: {sodium.approxSodium} grams
+                            </Text>
+                            <Text style={styles.textSubHeader}>
+                              Equivalent to: {sodium.approxSodium} tablespoons
+                            </Text>
                           </View>
                           <ImageLoop />
                       </View>  
@@ -190,16 +190,16 @@ function Feedback() {
                           <View style={styles.textContainer}>
                           <Text style={styles.textHeader}>
                             Calories: {calories.calories} g
-                          </Text>
-                          <Text style={styles.textSubHeader}>
-                            Approx calories: {calories.approxCalories} grams
-                          </Text>
-                          <Text style={styles.textSubHeader}>
-                            Equivalent to: {calories.caloriesTablepoon} tablespoons
-                          </Text>
+                            </Text>
+                            <Text style={styles.textSubHeader}>
+                              Approx calories: {calories.approxCalories} grams
+                            </Text>
+                            <Text style={styles.textSubHeader}>
+                              Equivalent to: {calories.caloriesTablepoon} tablespoons
+                            </Text>
                           </View>
                           <ImageLoop />
-                      </View>  
+                        </View>  
                       </View>
                                                         
                 </ScrollView>                

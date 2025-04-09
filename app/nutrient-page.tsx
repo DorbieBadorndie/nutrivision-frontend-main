@@ -368,8 +368,9 @@ const styles = StyleSheet.create({
   },
   logo: {
     width: 200,
-    height: 150,
+    height: 60,
     resizeMode: 'contain',
+    alignSelf: 'flex-start',
   },
   userIntakeCard: {
     marginTop: -15,

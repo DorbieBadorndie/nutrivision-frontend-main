@@ -1,270 +1,436 @@
-import React from 'react';
-import { StyleSheet, View, Image, Dimensions } from 'react-native';
+import React, { useState } from 'react';
+import { 
+  StyleSheet, 
+  View, 
+  Image, 
+  Text, 
+  SafeAreaView, 
+  TouchableOpacity,
+  ScrollView,
+  DimensionValue
+} from 'react-native';
 import { ThemedView } from '@/components/ThemedView';
 import { ThemedText } from '@/components/ThemedText';
+import PieChart from 'react-native-pie-chart';
+import { useNavigation } from '@react-navigation/native';
+import { RootStackParamList } from '@/types/types';
+import { StackNavigationProp } from '@react-navigation/stack';
+
+const toProgressWidth = (value: number) => `${Math.min(value, 100)}%` as DimensionValue;
+const toPercentageText = (value: number) => `${value}%`;
+const formatValue = (value: number, unit: string = 'g') => `${value} ${unit}`;
+
+type Page6ScreenNavigationProp = StackNavigationProp<RootStackParamList, 'page-6'>;
+
+interface NutritionData {
+  progress: {
+    sugar: { user: number; avg: number };
+    sodium: { user: number; avg: number };
+    calories: { user: number; avg: number };
+  };
+  values: {
+    sugar: { user: number; avg: number };
+    sodium: { user: number; avg: number };
+    calories: { user: number; avg: number };
+  };
+  intake: {
+    breakdown: { calories: number; sugar: number; sodium: number };
+    total: number;
+  };
+  avg: {
+    breakdown: { calories: number; sugar: number; sodium: number };
+    total: number;
+  };
+}
 
 export default function Page6() {
+  const [nutritionData] = useState<NutritionData>({
+    progress: {
+      sugar: { user: 88, avg: 50 },
+      sodium: { user: 33, avg: 50 },
+      calories: { user: 45, avg: 50 },
+    },
+    values: {
+      sugar: { user: 53, avg: 49 },
+      sodium: { user: 15, avg: 11 },
+      calories: { user: 180, avg: 147 }, 
+    },
+    intake: { 
+      breakdown: { calories: 22, sugar: 45, sodium: 22 },
+      total: 209
+    },
+    avg: { 
+      breakdown: { calories: 22, sugar: 45, sodium: 11 },
+      total: 210
+    },
+  });
+
+  const navigation = useNavigation<Page6ScreenNavigationProp>();
+
+  const handleCheck = () => {
+    navigation.navigate('page-2');
+  };
+
   return (
-    <ThemedView style={styles.container}>
-      <Image
-        source={require('@/assets/images/NutriVision.png')}
-        style={styles.logo}
-        accessibilityRole="image"
-        accessibilityLabel="NutriVision logo"
-      />
-      <View style={styles.detailBox}>
-        {/* Row 1: Legends (2 columns: 1/3 and 2/3 split) */}
-        <View style={styles.row}>
-          <View style={styles.legendCol1}>
-            <View style={styles.legend}>
-              <View style={[styles.square, { backgroundColor: 'black' }]} />
-              <ThemedText style={styles.legendText}>User input</ThemedText>
-            </View>
-          </View>
-          <View style={styles.legendCol2}>
-            <View style={styles.legend}>
-              <View style={[styles.square, { backgroundColor: '#9AB106' }]} />
-              <ThemedText style={styles.legendText}>Average intake</ThemedText>
-            </View>
-          </View>
+    <SafeAreaView style={styles.safeContainer}>
+      <ScrollView contentContainerStyle={styles.scrollContainer}>
+        <View style={styles.header}>
+          <Image
+            source={require('@/assets/images/NutriVision.png')}
+            style={styles.logo}
+            accessibilityRole="image"
+            accessibilityLabel="NutriVision logo"
+          />
         </View>
-        {/* Row 2: Sugar */}
-        <View style={styles.row}>
-          <View style={styles.dataCol1}>
-            <View style={styles.labelIconRow}>
-              <ThemedText style={styles.itemText}>Sugar</ThemedText>
-              <Image
-                source={require('@/assets/images/Sugar Icon.png')}
-                style={styles.icon}
-              />
-            </View>
-          </View>
-          <View style={styles.dataCol2}>
-            <View style={styles.progressBarRow}>
-              <View style={styles.progressBarContainer}>
-                <View
-                  style={[styles.progressBarSegment, { backgroundColor: 'black', width: '60%' }]}
-                />
+
+        <ThemedView style={styles.contentContainer}>
+          {/* Progress Bars Section */}
+          <View style={styles.progressContainer}>
+            {/* Legends - Now properly spaced */}
+            <View style={styles.legendsContainer}>
+              <View style={styles.legendItem}>
+                <View style={[styles.legendSquare, styles.userLegend]} />
+                <Text style={styles.legendText}>User input</Text>
+              </View>
+              <View style={[styles.legendItem, styles.legendItemSpacing]}>
+                <View style={[styles.legendSquare, styles.avgLegend]} />
+                <Text style={styles.legendText}>Average intake</Text>
               </View>
             </View>
-            <View style={styles.progressBarRow}>
-              <View style={styles.progressBarContainer}>
-                <View
-                  style={[styles.progressBarSegment, { backgroundColor: '#9AB106', width: '49%' }]}
-                />
+
+            {/* Sugar Row */}
+            <View style={styles.nutrientRow}>
+              <View style={styles.nutrientLabel}>
+                <Text style={styles.nutrientText}>Sugar</Text>
+                <Image source={require('@/assets/images/Sugar Icon.png')} style={styles.icon} />
+              </View>
+              <View style={styles.progressBars}>
+                <View style={styles.progressBarBackground}>
+                  <View style={[styles.progressBar, styles.userProgress, { width: toProgressWidth(nutritionData.progress.sugar.user) }]} />
+                </View>
+                <View style={styles.progressBarBackground}>
+                  <View style={[styles.progressBar, styles.avgProgress, { width: toProgressWidth(nutritionData.progress.sugar.avg) }]} />
+                </View>
+              </View>
+              <View style={styles.valueContainer}>
+                <Text style={styles.userValue}>{formatValue(nutritionData.values.sugar.user)}</Text>
+                <Text style={styles.avgValue}>{formatValue(nutritionData.values.sugar.avg)}</Text>
               </View>
             </View>
-          </View>
-          <View style={styles.dataCol3}>
-            <View style={styles.measurementRow}>
-              <ThemedText style={styles.measurementTextUp}>53 g</ThemedText>
-            </View>
-            <View style={styles.measurementRow}>
-              <ThemedText style={styles.measurementTextDown}>49 g</ThemedText>
-            </View>
-          </View>
-        </View>
-        {/* Row 3: Sodium */}
-        <View style={styles.row}>
-          <View style={styles.dataCol1}>
-            <View style={styles.labelIconRow}>
-              <ThemedText style={styles.itemText}>Sodium</ThemedText>
-              <Image
-                source={require('@/assets/images/Sodium Icon.png')}
-                style={styles.icon}
-              />
-            </View>
-          </View>
-          <View style={styles.dataCol2}>
-            <View style={styles.progressBarRow}>
-              <View style={styles.progressBarContainer}>
-                <View
-                  style={[styles.progressBarSegment, { backgroundColor: 'black', width: '33%' }]}
-                />
+
+            {/* Sodium Row */}
+            <View style={styles.nutrientRow}>
+              <View style={styles.nutrientLabel}>
+                <Text style={styles.nutrientText}>Sodium</Text>
+                <Image source={require('@/assets/images/Sodium Icon.png')} style={styles.icon} />
+              </View>
+              <View style={styles.progressBars}>
+                <View style={styles.progressBarBackground}>
+                  <View style={[styles.progressBar, styles.userProgress, { width: toProgressWidth(nutritionData.progress.sodium.user) }]} />
+                </View>
+                <View style={styles.progressBarBackground}>
+                  <View style={[styles.progressBar, styles.avgProgress, { width: toProgressWidth(nutritionData.progress.sodium.avg) }]} />
+                </View>
+              </View>
+              <View style={styles.valueContainer}>
+                <Text style={styles.userValue}>{formatValue(nutritionData.values.sodium.user)}</Text>
+                <Text style={styles.avgValue}>{formatValue(nutritionData.values.sodium.avg)}</Text>
               </View>
             </View>
-            <View style={styles.progressBarRow}>
-              <View style={styles.progressBarContainer}>
-                <View
-                  style={[styles.progressBarSegment, { backgroundColor: '#9AB106', width: '27%' }]}
-                />
+
+            {/* Calories Row */}
+            <View style={styles.nutrientRow}>
+              <View style={styles.nutrientLabel}>
+                <Text style={styles.nutrientText}>Calories</Text>
+                <Image source={require('@/assets/images/Cholesterol Icon.png')} style={styles.icon} />
               </View>
-            </View>
-          </View>
-          <View style={styles.dataCol3}>
-            <View style={styles.measurementRow}>
-              <ThemedText style={styles.measurementTextUp}>15 g</ThemedText>
-            </View>
-            <View style={styles.measurementRow}>
-              <ThemedText style={styles.measurementTextDown}>11 g</ThemedText>
-            </View>
-          </View>
-        </View>
-        {/* Row 4: Calories */}
-        <View style={styles.row}>
-          <View style={styles.dataCol1}>
-            <View style={styles.labelIconRow}>
-              <ThemedText style={styles.itemText}>Calories</ThemedText>
-              <Image
-                source={require('@/assets/images/Cholesterol Icon.png')}
-                style={styles.icon}
-              />
-            </View>
-          </View>
-          <View style={styles.dataCol2}>
-            <View style={styles.progressBarRow}>
-              <View style={styles.progressBarContainer}>
-                <View
-                  style={[styles.progressBarSegment, { backgroundColor: 'black', width: '45%' }]}
-                />
+              <View style={styles.progressBars}>
+                <View style={styles.progressBarBackground}>
+                  <View style={[styles.progressBar, styles.userProgress, { width: toProgressWidth(nutritionData.progress.calories.user) }]} />
+                </View>
+                <View style={styles.progressBarBackground}>
+                  <View style={[styles.progressBar, styles.avgProgress, { width: toProgressWidth(nutritionData.progress.calories.avg) }]} />
+                </View>
               </View>
-            </View>
-            <View style={styles.progressBarRow}>
-              <View style={styles.progressBarContainer}>
-                <View
-                  style={[styles.progressBarSegment, { backgroundColor: '#9AB106', width: '40%' }]}
-                />
+              <View style={styles.valueContainer}>
+                <Text style={styles.userValue}>{formatValue(nutritionData.values.calories.user)}</Text>
+                <Text style={styles.avgValue}>{formatValue(nutritionData.values.calories.avg)}</Text>
               </View>
             </View>
           </View>
-          <View style={styles.dataCol3}>
-            <View style={styles.measurementRow}>
-              <ThemedText style={styles.measurementTextUp}>180 g</ThemedText>
+
+          {/* Donut Charts Section */}
+          <View style={styles.chartsContainer}>
+            {/* User Intake Donut Chart */}
+            <View style={styles.chartBox}>
+              <View style={styles.chartRow}>
+                <View style={styles.chartWrapper}>
+                  <PieChart
+                    widthAndHeight={150}
+                    series={[
+                      { value: nutritionData.intake.breakdown.sodium, color: '#000000' },
+                      { value: nutritionData.intake.breakdown.sugar, color: '#c0b4b4' },
+                      { value: nutritionData.intake.breakdown.calories, color: '#7ca844' },
+                    ]}
+                    cover={0.55}
+                  />
+                </View>
+                <View style={styles.legendWrapper}>
+                  <Text style={styles.chartTitle}>User Intake</Text>
+                  <View style={styles.legendItem}>
+                    <View style={[styles.colorCircle, { backgroundColor: '#7ca844' }]} />
+                    <Text style={styles.legendLabel}>Calories ({toPercentageText(nutritionData.intake.breakdown.calories)})</Text>
+                  </View>
+                  <View style={styles.legendItem}>
+                    <View style={[styles.colorCircle, { backgroundColor: '#c0b4b4' }]} />
+                    <Text style={styles.legendLabel}>Sugar ({toPercentageText(nutritionData.intake.breakdown.sugar)})</Text>
+                  </View>
+                  <View style={styles.legendItem}>
+                    <View style={[styles.colorCircle, { backgroundColor: '#000000' }]} />
+                    <Text style={styles.legendLabel}>Sodium ({toPercentageText(nutritionData.intake.breakdown.sodium)})</Text>
+                  </View>
+                  <View style={styles.totalBox}>
+                    <Text style={styles.totalText}>
+                      Total Nutrient{'\n'}Amount = {formatValue(nutritionData.intake.total)}
+                    </Text>
+                  </View>
+                </View>
+              </View>
             </View>
-            <View style={styles.measurementRow}>
-              <ThemedText style={styles.measurementTextDown}>147 g</ThemedText>
+
+            {/* Average Intake Donut Chart */}
+            <View style={styles.chartBox}>
+              <View style={styles.chartRow}>
+                <View style={styles.chartWrapper}>
+                  <PieChart
+                    widthAndHeight={150}
+                    series={[
+                      { value: nutritionData.avg.breakdown.sodium, color: '#000000' },
+                      { value: nutritionData.avg.breakdown.sugar, color: '#c0b4b4' },
+                      { value: nutritionData.avg.breakdown.calories, color: '#7ca844' },
+                    ]}
+                    cover={0.55}
+                  />
+                </View>
+                <View style={styles.legendWrapper}>
+                  <Text style={styles.chartTitle}>Average Intake</Text>
+                  <View style={styles.legendItem}>
+                    <View style={[styles.colorCircle, { backgroundColor: '#7ca844' }]} />
+                    <Text style={styles.legendLabel}>Calories ({toPercentageText(nutritionData.avg.breakdown.calories)})</Text>
+                  </View>
+                  <View style={styles.legendItem}>
+                    <View style={[styles.colorCircle, { backgroundColor: '#c0b4b4' }]} />
+                    <Text style={styles.legendLabel}>Sugar ({toPercentageText(nutritionData.avg.breakdown.sugar)})</Text>
+                  </View>
+                  <View style={styles.legendItem}>
+                    <View style={[styles.colorCircle, { backgroundColor: '#000000' }]} />
+                    <Text style={styles.legendLabel}>Sodium ({toPercentageText(nutritionData.avg.breakdown.sodium)})</Text>
+                  </View>
+                  <View style={styles.totalBox}>
+                    <Text style={styles.totalText}>
+                      Total Nutrient{'\n'}Amount = {formatValue(nutritionData.avg.total)}
+                    </Text>
+                  </View>
+                </View>
+              </View>
             </View>
           </View>
-        </View>
-      </View>
-    </ThemedView>
+        </ThemedView>
+      </ScrollView>
+
+      <TouchableOpacity style={styles.checkButton} onPress={handleCheck}>
+        <ThemedText style={styles.checkMark}>✓</ThemedText>
+      </TouchableOpacity>
+    </SafeAreaView>
   );
 }
 
-const screenWidth = Dimensions.get('window').width;
-
 const styles = StyleSheet.create({
-  container: {
+  safeContainer: {
     flex: 1,
-    backgroundColor: '#eff1f6',
+    backgroundColor: '#F5F5F5',
+  },
+  scrollContainer: {
+    flexGrow: 1,
+    paddingBottom: 100,
+  },
+  header: {
+    width: '100%',
+    height: 100,
+    justifyContent: 'center',
+    alignItems: 'flex-start',
   },
   logo: {
-    position: 'absolute',
-    top: -15,
-    left: -7,
     width: 200,
-    height: 200,
+    height: 60,
     resizeMode: 'contain',
   },
-  detailBox: {
-    marginTop: 120,
-    marginHorizontal: 10,
-    width: screenWidth - 20,
-    height: 180,
+  contentContainer: {
+    flex: 1,
+    paddingHorizontal: 16,
+    paddingBottom: 16,
+    backgroundColor: '#F5F5F5',
+  },
+  progressContainer: {
     backgroundColor: 'white',
     borderRadius: 12,
-    padding: 10,
-    justifyContent: 'space-around',
+    padding: 16,
+    marginBottom: 16,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 6,
     elevation: 4,
   },
-  // Common row style
-  row: {
+  legendsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'flex-start',
+    marginBottom: 16,
+  },
+  legendItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginVertical: 2,
+    marginBottom: 4,
   },
-  // Row 1 (Legends)
-  legendCol1: {
-    flex: 1, // 1/3 of row
-    justifyContent: 'center',
+  legendItemSpacing: {
+    marginLeft: 24, // Additional spacing for the second legend
   },
-  legendCol2: {
-    flex: 3.3, // 2/3 of row
-    justifyContent: 'center',
-    alignItems: 'flex-start',
-  },
-  legend: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  square: {
-    width: 15,
-    height: 15,
-    marginRight: 8,
+  legendSquare: {
+    width: 16,
+    height: 16,
     borderRadius: 4,
+    marginRight: 8,
+  },
+  userLegend: {
+    backgroundColor: 'black',
+  },
+  avgLegend: {
+    backgroundColor: '#9AB106',
   },
   legendText: {
-    fontSize: 10,
+    fontSize: 14,
     color: '#333',
   },
-  // Data rows (Rows 2-4): 3 columns
-  dataCol1: {
-    flex: 2,
-    justifyContent: 'center',
+  nutrientRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 12,
   },
-  dataCol2: {
-    flex: 5.5,
-    justifyContent: 'center',
-  },
-  dataCol3: {
-    flex: 1,
-    justifyContent: 'flex-start',
-    alignItems: 'flex-start',
-  },
-  // Label and icon row in data rows
-  labelIconRow: {
+  nutrientLabel: {
+    flex: 1.5,
     flexDirection: 'row',
     alignItems: 'center',
   },
-  itemText: {
+  nutrientText: {
     fontSize: 14,
+    fontWeight: 'bold',
     color: '#333',
-    marginRight: 4,
-    fontWeight: 'bold'
+    marginRight: 8,
   },
   icon: {
     width: 20,
     height: 20,
-    resizeMode: 'contain',
   },
-  // Progress bar subrows in data rows (column 2)
-  progressBarRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginVertical: 1,
+  progressBars: {
+    flex: 3,
   },
-  progressBarContainer: {
-    flex: 1,
-    height: 3,
-    backgroundColor: '#ddd',
-    borderRadius: 100,
-    overflow: 'hidden',
-    marginRight: 4,
+  progressBarBackground: {
+    height: 4,
+    backgroundColor: '#EEEEEE', // Grey background for progress bar
+    borderRadius: 3,
     marginVertical: 2,
+    overflow: 'hidden',
   },
-  progressBarSegment: {
+  progressBar: {
     height: '100%',
-    borderRadius: 100,
+    borderRadius: 3,
   },
-  // Measurement rows in data rows (column 3)
-  measurementRow: {
-    justifyContent: 'flex-start',
+  userProgress: {
+    backgroundColor: 'black',
   },
-  measurementTextUp: {
+  avgProgress: {
+    backgroundColor: '#9AB106',
+  },
+  valueContainer: {
+    flex: 1,
+    alignItems: 'flex-end',
+  },
+  userValue: {
     fontSize: 12,
+    fontWeight: 'bold',
     color: '#333',
-    fontWeight: 'bold'
   },
-  measurementTextDown: {
+  avgValue: {
     fontSize: 12,
+    fontWeight: 'bold',
     color: '#9AB106',
-    marginTop: -8,
-    fontWeight: 'bold'
   },
-
+  chartsContainer: {
+    gap: 16,
+  },
+  chartBox: {
+    backgroundColor: 'white',
+    borderRadius: 12,
+    padding: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 6,
+    elevation: 4,
+  },
+  chartRow: {
+    flexDirection: 'row',
+  },
+  chartWrapper: {
+    position: 'relative',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  legendWrapper: {
+    flex: 1,
+    justifyContent: 'center',
+    paddingLeft: 16,
+  },
+  chartTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 12,
+  },
+  colorCircle: {
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    marginHorizontal: 12,
+  },
+  legendLabel: {
+    fontSize: 14,
+    color: '#333',
+  },
+  totalBox: {
+    backgroundColor: '#f8e4e4',
+    padding: 12,
+    borderRadius: 12,
+    marginTop: 12,
+  },
+  totalText: {
+    fontSize: 14,
+    color: '#333',
+    textAlign: 'left',
+  },
+  checkButton: {
+    position: 'absolute',
+    bottom: 20,
+    right: 20,
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: '#333',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  checkMark: {
+    fontSize: 25,
+    color: '#9AB106',
+    fontWeight: 'bold',
+  },
 });
-

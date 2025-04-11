@@ -28,6 +28,7 @@ interface ApiProviderProps {
 
 // Create the provider component
 export function ApiProvider({ children }: ApiProviderProps): JSX.Element {
+  console.log('✅ ApiProvider mounted');
   // State for storing uploaded images data
   const [uploadedImages, setUploadedImages] = useState<ImageToUpload[]>([]);
   // State for storing API response data
@@ -111,6 +112,7 @@ export function ApiProvider({ children }: ApiProviderProps): JSX.Element {
 // Custom hook for using this context
 export function useApi(): ApiContextState {
   const context = useContext(ApiContext);
+  console.log('📌 useApi called, context:', context);
   if (context === undefined) {
     throw new Error('useApi must be used within an ApiProvider');
   }

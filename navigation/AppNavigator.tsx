@@ -9,14 +9,13 @@ import UserNutrientPage from '@/app/nutrient-page';
 import Camera from '@/app/camera';
 import Feedback from '@/app/feedback';
 import { create } from 'react-test-renderer';
-import { ApiProvider } from '@/hooks/ApiContext';
+
 
 const Stack = createStackNavigator<RootStackParamList>();
 
 export default function AppNavigator() {
   return (
-    <ApiProvider>
-      <NavigationContainer>
+    <NavigationContainer>
         <Stack.Navigator initialRouteName="index">
           <Stack.Screen name="index" component={index} />
           <Stack.Screen name="page-6" component={Page6} />
@@ -25,7 +24,6 @@ export default function AppNavigator() {
           <Stack.Screen name="camera" component={Camera} />
           <Stack.Screen name="feedback" component={Feedback} />
         </Stack.Navigator>
-      </NavigationContainer>
-    </ApiProvider>
+    </NavigationContainer>
   );
 }

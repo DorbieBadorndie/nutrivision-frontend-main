@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
+import { useFocusEffect, useIsFocused } from '@react-navigation/native';
 import { 
   View, 
   Image, 
@@ -19,6 +20,9 @@ import { RootStackParamList } from '@/types/types';
 import { StackNavigationProp } from '@react-navigation/stack';
 import * as MediaLibrary from 'expo-media-library';
 import PieChart from 'react-native-pie-chart';
+import { useRoute } from '@react-navigation/native';
+
+//import  {useApi} from '@/hooks/ApiContext';
 
 const { width, height } = Dimensions.get('window');
 
@@ -29,14 +33,45 @@ const formatValue = (value: number, unit: string = 'g'): string => `${value} ${u
 type HomeScreenNavigationProp = StackNavigationProp<RootStackParamList, 'index'>;
 
 export default function UserNutrientPage() {
+  const route = useRoute();
+  const { data } = route.params as { data: any };
   const [fontsLoaded] = useFonts({
     'SpaceMono-Regular': require('@/assets/fonts/SpaceMono-Regular.ttf'),
   });
   const [capturedPhotos, setCapturedPhotos] = useState<{ uri: string; type: string; orientation: string }[]>([]);
   const [mediaLibraryPermission, setMediaLibraryPermission] = useState<boolean | null>(null);
+  //const { extractedData } = useApi();
 
   // Navigation
   const navigation = useNavigation() as HomeScreenNavigationProp;
+
+  useEffect(() => {
+    if (data?.combined) {
+      const parseGrams = (value: string): number => {
+        if (value.toLowerCase().includes('mg')) {
+          return parseFloat(value) / 1000;
+        } else {
+          return parseFloat(value);
+        }
+      };
+  
+      const carbohydrate = parseGrams(data.combined.carbs_total);
+      const protein = parseGrams(data.combined.protein_total);
+      const sodium = parseGrams(data.combined.sodium_total);
+  
+      setNutrients({ carbohydrate, protein, sodium });
+  
+      const total = ((carbohydrate + protein + sodium) / 3).toFixed(2);
+  
+      setNutritionData({
+        userIntake: {
+          breakdown: { carbohydrate, protein, sodium },
+          total: parseFloat(total)
+        }
+      });
+    }
+  }, [data]);
+  
 
   // State for nutrient inputs (now as numbers without units)
   const [nutrients, setNutrients] = useState({
@@ -98,48 +133,75 @@ export default function UserNutrientPage() {
   }, []);
 
   // Load previously captured photos on mount
+ // Request media library permissions on mount
   useEffect(() => {
-    if (mediaLibraryPermission) {
-      loadRecentPhotos();
-    }
-  }, [mediaLibraryPermission]);
+    (async () => {
+      const { status } = await MediaLibrary.requestPermissionsAsync();
+      setMediaLibraryPermission(status === 'granted');
+    })();
+  }, []);
+
+  useFocusEffect(
+          useCallback(() => {
+            if (mediaLibraryPermission) {
+              loadRecentPhotos();
+            }
+        
+            return () => {
+              // Optional: reset or cancel something if needed
+              console.log('Leaving the screen');
+            };
+          }, [mediaLibraryPermission])
+        );
 
   const loadRecentPhotos = async () => {
-    try {
-      const { assets } = await MediaLibrary.getAssetsAsync({
-        first: 5,
-        mediaType: 'photo',
-        sortBy: ['creationTime']
-      });
-
-      const recentPhotos = [];
-      for (const asset of assets) {
-        let uriToUse = asset.uri;
-        if (Platform.OS === 'ios' && uriToUse.startsWith('ph://')) {
           try {
-            const info = await MediaLibrary.getAssetInfoAsync(asset);
-            if (info.localUri) {
-              uriToUse = info.localUri;
+            // First, get the NutriVision album
+            const album = await MediaLibrary.getAlbumAsync("NutriVision");
+            
+            // If the album doesn't exist yet, return empty array
+            if (!album) {
+              console.log('NutriVision album not found');
+              setCapturedPhotos([]);
+              return;
             }
-          } catch (error) {
-            console.error('Error getting localUri for asset:', error);
-          }
-        }
+            
+            // Get assets from the NutriVision album specifically
+            const { assets } = await MediaLibrary.getAssetsAsync({
+              album: album.id,
+              first: 5,
+              mediaType: 'photo',
+              sortBy: ['creationTime']
+            });
         
-        recentPhotos.push({
-          uri: uriToUse,
-          type: Math.random() > 0.5 ? 'label' : 'fruit',
-          orientation: Math.random() > 0.5 ? 'vertical' : 'horizontal'
-        });
-      }
-
-      setCapturedPhotos(recentPhotos.slice(0, 5).filter(photo => 
-        photo.uri && typeof photo.uri === 'string'
-      ));
-    } catch (error) {
-      console.error('Error loading recent photos:', error);
-    }
-  };
+            const recentPhotos = [];
+            for (const asset of assets) {
+              let uriToUse = asset.uri;
+              if (Platform.OS === 'ios' && uriToUse.startsWith('ph://')) {
+                try {
+                  const info = await MediaLibrary.getAssetInfoAsync(asset);
+                  if (info.localUri) {
+                    uriToUse = info.localUri;
+                  }
+                } catch (error) {
+                  console.error('Error getting localUri for asset:', error);
+                }
+              }
+              
+              recentPhotos.push({
+                uri: uriToUse,
+                type: Math.random() > 0.5 ? 'label' : 'fruit',
+                orientation: Math.random() > 0.5 ? 'vertical' : 'horizontal'
+              });
+            }
+        
+            setCapturedPhotos(recentPhotos.filter(photo => 
+              photo.uri && typeof photo.uri === 'string'
+            ));
+          } catch (error) {
+            console.error('Error loading photos from NutriVision album:', error);
+          }
+        };
 
   const handleCheck = () => {
     navigation.navigate('page-6');
@@ -317,7 +379,8 @@ export default function UserNutrientPage() {
                   </View>
                   <View style={styles.legendItem}>
                     <View style={[styles.colorCircle, { backgroundColor: '#000000' }]} />
-                    <Text style={styles.legendLabel}>Protein ({toPercentageText(nutritionData.userIntake.breakdown.protein)})</Text>
+                    <Text style={styles.legendLabel}>P
+                      protein ({toPercentageText(nutritionData.userIntake.breakdown.protein)})</Text>
                   </View>
                   <View style={styles.totalBox}>
                     <Text style={styles.totalText}>
@@ -625,3 +688,4 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
 });
+

@@ -75,8 +75,8 @@ const PhotoPreviewSection = ({ photo, onBack, onSubmit }) => {
             <Ionicons name="arrow-back" size={28} color="white" />
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.captureButton} onPress={onSubmit}>
-            <Ionicons name="checkmark" size={32} color="white" />
+          <TouchableOpacity style={styles.roundButton} onPress={onSubmit}>
+            <Ionicons name="checkmark" size={28} color="white" />
           </TouchableOpacity>
         </View>
       </View>
@@ -113,20 +113,11 @@ const styles = StyleSheet.create({
   roundButton: {
     width: 55,
     height: 55,
-    borderRadius: 30,
+    borderRadius: 28,
     backgroundColor: 'rgba(144, 238, 144, 0.8)',
     justifyContent: 'center',
     alignItems: 'center',
     margin: 10,
-  },
-  captureButton: {
-    width: 70,
-    height: 70,
-    borderRadius: 35,
-    backgroundColor: 'rgba(144, 238, 144, 0.8)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    elevation: 5,
   }
 });
 

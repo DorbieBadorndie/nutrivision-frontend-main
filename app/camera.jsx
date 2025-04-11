@@ -326,20 +326,9 @@ import React, { useRef, useState, useEffect } from 'react';
         <View style={styles.container}>
           <PhotoPreviewSection
             photo={photo}
+            onBack={() => setPhoto(null)}
+            onSubmit={() => handleSavePhoto()}
           />
-          
-          {/* Bottom Controls: Left = Back, Right = Submit */}
-          <View style={styles.bottomControlsContainer}>
-            <View style={styles.bottomControls}>
-              <TouchableOpacity style={styles.roundButton} onPress={() => setPhoto(null)}>
-                <Ionicons name="arrow-back" size={28} color="white" />
-              </TouchableOpacity>
-
-              <TouchableOpacity style={styles.captureButton} onPress={() => handleSavePhoto()}>
-                <Ionicons name="checkmark" size={32} color="white" />
-              </TouchableOpacity>
-            </View>
-          </View>
         </View>
       );
     }

@@ -17,7 +17,7 @@ export default function Page2() {
   const navigation = useNavigation<Page2ScreenNavigationProp>();
   const { width } = Dimensions.get('window');
   const handleCheck = () => {
-    navigation.navigate('page-6');
+    navigation.navigate('camera');
   };
 
   return (

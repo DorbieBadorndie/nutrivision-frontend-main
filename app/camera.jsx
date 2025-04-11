@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from 'react'; 
+import React, { useRef, useState, useEffect, createContext, useContext } from 'react'; 
   import { 
     AntDesign, 
     Ionicons 
@@ -20,12 +20,17 @@ import React, { useRef, useState, useEffect } from 'react';
   import { CameraView, useCameraPermissions } from 'expo-camera';
   import * as MediaLibrary from 'expo-media-library';
   import * as ImageManipulator from 'expo-image-manipulator';
+  import { useNavigation } from '@react-navigation/native';
+  import { StackNavigationProp } from '@react-navigation/stack';
+  import { useIsFocused } from '@react-navigation/native';
 
   import PhotoPreviewSection from '@/components/PhotoPreviewSection';
+  import { navigate } from 'expo-router/build/global-state/routing';
 
   const { height } = Dimensions.get('window');
 
   export default function Camera() {
+    const MyContext = createContext();
     const [permission, requestPermission] = useCameraPermissions();
     const [photo, setPhoto] = useState(null);
     const [isLabelMode, setIsLabelMode] = useState(true); // Default to label mode
@@ -35,10 +40,16 @@ import React, { useRef, useState, useEffect } from 'react';
     // Always vertical (portrait) orientation. No toggle.
     const boxOrientation = 'vertical';
 
+    const navigation = useNavigation();
     // Always use the back camera. No toggle.
     const facing = 'back';
 
     const cameraRef = useRef(null);
+
+    useEffect(() => {
+      console.log('Screen MOUNTED');
+      return () => console.log('Screen UNMOUNTED');
+    }, []);
 
     // Add this function inside the Camera component before the useEffect
     const loadExistingPhotos = async () => {
@@ -128,9 +139,7 @@ import React, { useRef, useState, useEffect } from 'react';
 
     // --- Handlers ---
     function handleGoBack() {
-      // Replace with your actual navigation go-back, e.g.:
-      // navigation.goBack();
-      console.log('Go back pressed'); 
+      navigation.goBack();
     }
 
     function toggleMode() {
@@ -410,9 +419,10 @@ import React, { useRef, useState, useEffect } from 'react';
             <View style={styles.bottomControlsContainer}>
               <View style={styles.bottomControls}>
                 {/* LEFT: Go Back */}
-                <TouchableOpacity style={styles.roundButton} onPress={handleGoBack}>
+                <TouchableOpacity style={styles.roundButton} onPress={handleGoBack} disabled={false}>
                   <Ionicons name="arrow-back" size={28} color="white" />
                 </TouchableOpacity>
+                
 
                 {/* CENTER: Capture */}
                 <TouchableOpacity style={styles.captureButton} onPress={handleTakePhoto}>

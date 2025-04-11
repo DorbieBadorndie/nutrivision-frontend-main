@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { useFocusEffect } from '@react-navigation/native';
+import { useFocusEffect, useIsFocused } from '@react-navigation/native';
 import { 
   View, 
   Image, 
@@ -38,6 +38,8 @@ function Feedback() {
     const [sodium, setSodium] = useState<sodium>({sodium: 0, approxSodium: 0, sodiumTablespoon: 0});
     const [calories, setCalories] = useState<calories>({calories: 0, approxCalories: 0, caloriesTablepoon: 0});
     const [requrestMessage, setRequestMessage] = useState<string>('');
+
+
     // Request media library permissions on mount
       useEffect(() => {
         (async () => {
@@ -236,7 +238,7 @@ function Feedback() {
                                                    
                 </ScrollView>                
             </KeyboardAvoidingView>
-            <TouchableOpacity style={styles.checkButton} onPress={handleCheck}>
+            <TouchableOpacity style={styles.checkButton} onPress={handleCheck} disabled={false}>
                     <Image 
                         source={require('@/assets/images/Home.png')} 
                         style={{ width: 30, height: 30 }} // Adjust the size as needed

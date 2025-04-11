@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { SafeAreaView, Image, StyleSheet, View, Dimensions } from 'react-native';
+import { SafeAreaView, Image, StyleSheet, View, Dimensions, Platform, TouchableOpacity } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import * as FileSystem from 'expo-file-system';
 
 const { width, height } = Dimensions.get('window');
 
-const PhotoPreviewSection = ({ photo }) => {
+const PhotoPreviewSection = ({ photo, onBack, onSubmit }) => {
   const [imageUri, setImageUri] = useState(null);
   const [processedUri, setProcessedUri] = useState(null); 
 
@@ -59,52 +60,74 @@ const PhotoPreviewSection = ({ photo }) => {
   if (!imageUri) return null;
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={[
-        photo.type === 'label' ? styles.labelWrapper : styles.fruitWrapper
-      ]}>
-        <Image
-          style={styles.image}
-          source={{ uri: imageUri }}
-          resizeMode={photo.type === 'label' ? "contain" : "cover"}
-          resizeMethod="resize"
-        />
+    <View style={styles.container}>
+      {/* Full screen image */}
+      <Image
+        style={styles.fullScreenImage}
+        source={{ uri: imageUri }}
+        resizeMode="contain"
+      />
+
+      {/* Bottom Controls */}
+      <View style={styles.bottomControlsContainer}>
+        <View style={styles.bottomControls}>
+          <TouchableOpacity style={styles.roundButton} onPress={onBack}>
+            <Ionicons name="arrow-back" size={28} color="white" />
+          </TouchableOpacity>
+
+          <TouchableOpacity style={styles.captureButton} onPress={onSubmit}>
+            <Ionicons name="checkmark" size={32} color="white" />
+          </TouchableOpacity>
+        </View>
       </View>
-    </SafeAreaView>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#1a1a1a',
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 20,
+    backgroundColor: '#000',
   },
-  labelWrapper: {
-    borderColor: '#f5dd4b',
-    borderWidth: 3,
-    width: '70%', // Match camera module's cropWidth
-    height: '60%', // Match camera module's cropHeight
-    backgroundColor: 'transparent',
-    justifyContent: 'center',
-    alignItems: 'center',
-    overflow: 'hidden',
-    // Remove marginTop to match camera cropping
-  },
-  fruitWrapper: {
+  fullScreenImage: {
     width: '100%',
     height: '100%',
-    backgroundColor: 'transparent',
+    backgroundColor: '#000',
+  },
+  bottomControlsContainer: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.4)',
+    paddingVertical: 15,
+    paddingHorizontal: 20,
+  },
+  bottomControls: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+  },
+  roundButton: {
+    width: 55,
+    height: 55,
+    borderRadius: 30,
+    backgroundColor: 'rgba(144, 238, 144, 0.8)',
     justifyContent: 'center',
     alignItems: 'center',
-    overflow: 'hidden',
+    margin: 10,
   },
-  image: {
-    width: '100%',
-    height: '100%',
-  },
+  captureButton: {
+    width: 70,
+    height: 70,
+    borderRadius: 35,
+    backgroundColor: 'rgba(144, 238, 144, 0.8)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    elevation: 5,
+  }
 });
 
 export default PhotoPreviewSection;

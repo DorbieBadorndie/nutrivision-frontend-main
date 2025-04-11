@@ -40,11 +40,11 @@ export default function Page2() {
       {/* Container 1 */}
       <View style={[styles.column]}>
         {<View style={styles.textRow}>
-        <Text style={styles.title}>11g</Text>
+        <Text style={styles.title}>310g</Text>
         </View>
     }
         <View style={styles.textRow}>
-        <Text style={styles.subtitle}>Carbohydrates</Text>
+        <Text style={styles.subtitle}>Carbohydrate</Text>
         </View>
         {/* Circular Progress with Image */}
     
@@ -61,12 +61,12 @@ export default function Page2() {
     {
       () => (
         <Image 
-          source={require('@/assets/images/Sugar Icon.png')} // Change this to your desired image
+          source={require('@/assets/images/Carbohydrate Icon.png')} // Change this to your desired image
           style={{ 
             width: 40,
             height: 40,
             borderRadius: 20,
-            transform: [{ rotate: '450deg' }, { scaleX: 1 }],
+            transform: [{ rotate: '450deg' }, { scaleX: -1 }],
           }}
           resizeMode="contain"
         />
@@ -83,7 +83,7 @@ export default function Page2() {
       <View style={[styles.column]}>
         {/* Your content */}
         {<View style={styles.textRow}>
-        <Text style={styles.title}>15g</Text>
+        <Text style={styles.title}>28g</Text>
         </View>}
         <View style={styles.textRow}>
         <Text style={styles.subtitle}>Sodium</Text>
@@ -123,10 +123,10 @@ export default function Page2() {
       <View style={[styles.column,]}>
         {/* Your content */}
         {<View style={styles.textRow}>
-        <Text style={styles.title}>16g</Text>
+        <Text style={styles.title}>64g</Text>
         </View>}
         <View style={styles.textRow}>
-        <Text style={styles.subtitle}>Calories</Text>
+        <Text style={styles.subtitle}>Protein</Text>
         </View>
         <View style={styles.textRow}> 
         <View style={styles.progressRow}>
@@ -141,12 +141,12 @@ export default function Page2() {
     {
       () => (
         <Image 
-          source={require('@/assets/images/Cholesterol Icon.png')} // Change this to your desired image
+          source={require('@/assets/images/Protein Icon.png')} // Change this to your desired image
           style={{ 
             width: 40,
             height: 40,
             borderRadius: 20,
-            transform: [{ rotate: '450deg' }, { scaleX: 1 }],
+            transform: [{ rotate: '450deg' }, { scaleX: -1 }],
           }}
           resizeMode="contain"
         />

@@ -14,13 +14,16 @@ import React, { useRef, useState, useEffect } from 'react';
     Image, 
     ScrollView,
     Platform,
-    SafeAreaView
+    SafeAreaView,
+    Dimensions
   } from 'react-native';
   import { CameraView, useCameraPermissions } from 'expo-camera';
   import * as MediaLibrary from 'expo-media-library';
   import * as ImageManipulator from 'expo-image-manipulator';
 
   import PhotoPreviewSection from '@/components/PhotoPreviewSection';
+
+  const { height } = Dimensions.get('window');
 
   export default function Camera() {
     const [permission, requestPermission] = useCameraPermissions();
@@ -60,31 +63,29 @@ import React, { useRef, useState, useEffect } from 'react';
           reverse: true
         });
     
-        // Transform assets into the format expected by capturedPhotos
-        const photos = await Promise.all(assets.map(async (asset) => {
-          if (Platform.OS === 'ios') {
-            try {
-              // Get the asset info which contains the local URI
-              const assetInfo = await MediaLibrary.getAssetInfoAsync(asset);
-              return {
-                uri: assetInfo.localUri || asset.uri,
-                type: 'label',
-                id: asset.id
-              };
-            } catch (error) {
-              console.error('Error getting asset info:', error);
-              return null;
-            }
-          }
+        console.log('Found assets:', assets.length); // Debug log
     
-          return {
-            uri: asset.uri,
-            type: 'label',
-            id: asset.id
-          };
+        const photos = await Promise.all(assets.map(async (asset) => {
+          try {
+            const assetInfo = await MediaLibrary.getAssetInfoAsync(asset);
+            const uri = Platform.OS === 'ios'
+              ? `file://${assetInfo.localUri?.replace('ph://', '') || assetInfo.uri.replace('ph://', '')}`
+              : asset.uri;
+    
+            return {
+              uri,
+              type: 'label', // or determine type from metadata if available
+              id: asset.id
+            };
+          } catch (error) {
+            console.error('Error processing asset:', error);
+            return null;
+          }
         }));
     
         const validPhotos = photos.filter(photo => photo !== null);
+        console.log('Valid photos:', validPhotos.length); // Debug log
+    
         setCapturedPhotos(validPhotos);
     
       } catch (error) {
@@ -103,6 +104,12 @@ import React, { useRef, useState, useEffect } from 'react';
         }
       })();
     }, []);
+
+    useEffect(() => {
+      if (mediaLibraryPermission) {
+        loadExistingPhotos();
+      }
+    }, [mediaLibraryPermission]);
 
     // --- Permission checks for camera ---
     if (!permission) {
@@ -185,17 +192,8 @@ import React, { useRef, useState, useEffect } from 'react';
         // For iOS, get the proper local URI
         let localUri = asset.uri;
         if (Platform.OS === 'ios') {
-          try {
-            const assetInfo = await MediaLibrary.getAssetInfoAsync(asset);
-            // Convert the URI to a format that Image component can use
-            localUri = assetInfo.localUri || assetInfo.uri;
-            if (localUri.startsWith('ph://')) {
-              localUri = `file://${localUri.replace('ph://', '')}`;
-            }
-          } catch (error) {
-            console.error('Error getting asset info:', error);
-            localUri = asset.uri; // Fallback to original URI
-          }
+          const assetInfo = await MediaLibrary.getAssetInfoAsync(asset);
+          localUri = assetInfo.localUri || assetInfo.uri;
         }
     
         // Save to "NutriVision" album
@@ -206,15 +204,24 @@ import React, { useRef, useState, useEffect } from 'react';
           await MediaLibrary.addAssetsToAlbumAsync([asset], album, false);
         }
     
-        // Update local state with proper URI
+        // Create the photoWithId object with the proper URI format
         const photoWithId = {
           ...photo,
-          uri: localUri,
+          uri: Platform.OS === 'ios' ? `file://${localUri.replace('ph://', '')}` : localUri,
           id: asset.id,
           type: photo.type || 'label'
         };
     
-        setCapturedPhotos(prev => [photoWithId, ...prev].slice(0, 5));
+        // Update local state
+        setCapturedPhotos(prev => {
+          const newPhotos = [photoWithId, ...prev].slice(0, 5);
+          console.log('Updated photos:', newPhotos); // Debug log
+          return newPhotos;
+        });
+    
+        // Reload photos from gallery to ensure consistency
+        await loadExistingPhotos();
+    
         Alert.alert('Success', 'Photo saved to your gallery in NutriVision!');
         setPhoto(null);
     
@@ -226,73 +233,86 @@ import React, { useRef, useState, useEffect } from 'react';
 
     const handleDeletePhoto = async (photoToDelete, index) => {
       try {
-        // First check for permissions
+        console.log('Attempting to delete photo:', {
+          id: photoToDelete.id,
+          uri: photoToDelete.uri,
+          index
+        });
+    
         const { status } = await MediaLibrary.requestPermissionsAsync();
         if (status !== 'granted') {
-          Alert.alert(
-            'Permission required',
-            'We need permission to delete photos from your gallery.'
-          );
+          Alert.alert('Permission required', 'We need permission to delete photos from your gallery.');
           return;
         }
     
-        // On iOS, we can directly delete using the asset ID
-        if (photoToDelete.id) {
-          try {
-            const success = await MediaLibrary.deleteAssetsAsync([photoToDelete.id]);
-            if (success) {
-              // Remove from thumbnails after successful gallery deletion
-              setCapturedPhotos(prev => prev.filter((_, i) => i !== index));
-              console.log('Photo deleted successfully');
-            } else {
-              Alert.alert('Error', 'Failed to delete photo from gallery');
-            }
-          } catch (deleteError) {
-            console.error('Error deleting asset:', deleteError);
-            Alert.alert('Error', 'Failed to delete photo');
-          }
-          return;
-        }
-    
-        // Fallback method if no ID is available
+        // Get the album first
         const album = await MediaLibrary.getAlbumAsync("NutriVision");
         if (!album) {
           console.log('NutriVision album not found');
           return;
         }
     
+        // Get all assets from the album
         const { assets } = await MediaLibrary.getAssetsAsync({
           album: album.id,
-          mediaType: ['photo'],
-          first: 50,
-          sortBy: ['creationTime'],
-          reverse: true // Get most recent first
+          mediaType: ['photo']
         });
     
-        if (assets.length === 0) {
-          console.log('No assets found in album');
-          return;
+        console.log('Found assets in album:', assets.length);
+    
+        // Clean up URIs for comparison
+        const cleanUri = (uri) => {
+          if (!uri) return '';
+          return uri
+            .replace('ph://', '')
+            .replace('file://', '')
+            .split('?')[0]
+            .split('#')[0];
+        };
+    
+        // Try to find the asset to delete
+        let assetToDelete;
+        
+        if (photoToDelete.id) {
+          // First try by ID
+          assetToDelete = assets.find(asset => asset.id === photoToDelete.id);
         }
     
-        // Find matching asset by comparing URIs
-        const assetToDelete = assets.find(asset => 
-          asset.uri.replace('ph://', '') === photoToDelete.uri.replace('ph://', '')
-        );
+        if (!assetToDelete) {
+          // If not found by ID, try by URI
+          const targetUri = cleanUri(photoToDelete.uri);
+          console.log('Looking for URI match:', targetUri);
+          
+          assetToDelete = assets.find(asset => {
+            const assetUri = cleanUri(asset.uri);
+            const matches = assetUri === targetUri;
+            if (matches) {
+              console.log('Found matching asset:', asset.id);
+            }
+            return matches;
+          });
+        }
     
         if (assetToDelete) {
-          const success = await MediaLibrary.deleteAssetsAsync([assetToDelete]);
+          const success = await MediaLibrary.deleteAssetsAsync([assetToDelete.id]);
           if (success) {
+            // Remove from local state only after successful deletion
             setCapturedPhotos(prev => prev.filter((_, i) => i !== index));
             console.log('Photo deleted successfully');
+            
+            // Reload the gallery to ensure consistency
+            await loadExistingPhotos();
           } else {
-            Alert.alert('Error', 'Failed to delete photo from gallery');
+            throw new Error('Failed to delete asset');
           }
         } else {
-          Alert.alert('Error', 'Could not find photo in gallery');
+          console.log('Asset not found in album');
+          // Remove from local state even if asset not found
+          setCapturedPhotos(prev => prev.filter((_, i) => i !== index));
         }
     
       } catch (error) {
-        console.error('Error in handleDeletePhoto:', error);
+        console.error('Delete photo error:', error);
         Alert.alert(
           'Error',
           'Failed to delete photo. Please try again.'
@@ -324,86 +344,100 @@ import React, { useRef, useState, useEffect } from 'react';
       );
     }
 
-    // --- Otherwise, show the Camera view ---
+    // Update the return statement layout
     return (
       <View style={styles.container}>
-        {/* Thumbnails Row: Only photos captured by this module, limited to 5 */}
-        <SafeAreaView style={styles.thumbnailsContainer}>
-          <View style={styles.thumbnailsRow}>
-            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-              {capturedPhotos.map((item, index) => (
-                <View key={index} style={styles.thumbnailContainer}>
-                  <Image 
-                    source={{ 
-                      uri: Platform.OS === 'ios' 
-                        ? `file://${item.uri.replace('ph://', '').replace('file://', '')}`
-                        : item.uri 
-                    }} 
-                    style={styles.thumbnail}
-                    resizeMode="cover"
-                    onError={(e) => console.log('Image loading error:', e.nativeEvent.error)}
-                  />
-                  <TouchableOpacity
-                    style={styles.deleteButton}
-                    onPress={() => handleDeletePhoto(item, index)}
-                  >
-                    <AntDesign name="close" size={16} color="white" />
-                  </TouchableOpacity>
-                  <View
-                    style={[
-                      styles.thumbnailIndicator,
-                      item.type === 'label' ? styles.labelIndicator : styles.fruitIndicator
-                    ]}
-                  />
-                </View>
-              ))}
-            </ScrollView>
-          </View>
-        </SafeAreaView>
-
-        {/* Mode Selector at the bottom (Labels / Fruits) */}
-        <View style={styles.modeSelectorBottom}>
-          <View style={styles.switchContainer}>
-            <Text style={[styles.switchLabel, isLabelMode ? styles.activeSwitchLabel : {}]}>Labels</Text>
-            <Switch
-              trackColor={{ false: '#767577', true: '#81b0ff' }}
-              thumbColor={isLabelMode ? '#f5dd4b' : '#f4f3f4'}
-              ios_backgroundColor="#3e3e3e"
-              onValueChange={toggleMode}
-              value={!isLabelMode} // Inverted because true = fruit mode
-            />
-            <Text style={[styles.switchLabel, !isLabelMode ? styles.activeSwitchLabel : {}]}>Fruits</Text>
-          </View>
+        {/* Top section for thumbnails */}
+        <View style={styles.topSection}>
+          <SafeAreaView>
+            <View style={styles.thumbnailsRow}>
+              <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                {capturedPhotos.map((item, index) => (
+                  <View key={index} style={styles.thumbnailContainer}>
+                    <Image 
+                      source={{ 
+                        uri: Platform.OS === 'ios' 
+                          ? `file://${item.uri.replace('ph://', '').replace('file://', '')}`
+                          : item.uri 
+                      }} 
+                      style={styles.thumbnail}
+                      resizeMode="cover"
+                      onError={(e) => console.log('Image loading error:', e.nativeEvent.error)}
+                    />
+                    <TouchableOpacity
+                      style={styles.deleteButton}
+                      onPress={() => {
+                        console.log('Delete button pressed for index:', index);
+                        handleDeletePhoto(item, index);
+                      }}
+                      hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }} // Increase touch area
+                    >
+                      <AntDesign name="close" size={16} color="white" />
+                    </TouchableOpacity>
+                    <View
+                      style={[
+                        styles.thumbnailIndicator,
+                        item.type === 'label' ? styles.labelIndicator : styles.fruitIndicator
+                      ]}
+                    />
+                  </View>
+                ))}
+              </ScrollView>
+            </View>
+          </SafeAreaView>
         </View>
 
-        <CameraView style={styles.camera} facing={facing} ref={cameraRef}>
-          {/* Overlay + guide box (only in label mode) */}
-          <View style={styles.overlay}>
-            {isLabelMode && (
-              <View style={[styles.guideBox, styles.labelGuideBox]} />
-            )}
-          </View>
-
-          {/* Bottom Controls: Left = Back, Center = Capture, Right = Submit (disabled if no photo) */}
-          <View style={styles.bottomControlsContainer}>
-            <View style={styles.bottomControls}>
-              {/* LEFT: Go Back */}
-              <TouchableOpacity style={styles.roundButton} onPress={handleGoBack}>
-                <Ionicons name="arrow-back" size={28} color="white" />
-              </TouchableOpacity>
-
-              {/* CENTER: Capture */}
-              <TouchableOpacity style={styles.captureButton} onPress={handleTakePhoto}>
-                <View style={styles.captureButtonInner} />
-              </TouchableOpacity>
-
-              {/* RIGHT: Submit Photo (disabled because no photo yet) */}
-              <TouchableOpacity style={[styles.roundButton, { opacity: 0.5 }]} disabled={true}>
-                <Ionicons name="checkmark" size={28} color="white" />
-              </TouchableOpacity>
+        {/* Main camera section with flex */}
+        <View style={styles.mainSection}>
+          {/* Mode Selector */}
+          <View style={styles.modeSelectorWrapper}>
+            <View style={styles.switchContainer}>
+              <Text style={[styles.switchLabel, isLabelMode ? styles.activeSwitchLabel : {}]}>
+                Labels
+              </Text>
+              <Switch
+                trackColor={{ false: '#767577', true: '#81b0ff' }}
+                thumbColor={isLabelMode ? 'lightgreen' : '#f4f3f4'}
+                ios_backgroundColor="#3e3e3e"
+                onValueChange={toggleMode}
+                value={!isLabelMode}
+              />
+              <Text style={[styles.switchLabel, !isLabelMode ? styles.activeSwitchLabel : {}]}>
+                Fruits
+              </Text>
             </View>
           </View>
-        </CameraView>
+
+          {/* Camera View */}
+          <CameraView style={styles.camera} facing={facing} ref={cameraRef}>
+            {/* Overlay + guide box (only in label mode) */}
+            <View style={styles.overlay}>
+              {isLabelMode && (
+                <View style={[styles.guideBox, styles.labelGuideBox]} />
+              )}
+            </View>
+
+            {/* Bottom Controls: Left = Back, Center = Capture, Right = Submit (disabled if no photo) */}
+            <View style={styles.bottomControlsContainer}>
+              <View style={styles.bottomControls}>
+                {/* LEFT: Go Back */}
+                <TouchableOpacity style={styles.roundButton} onPress={handleGoBack}>
+                  <Ionicons name="arrow-back" size={28} color="white" />
+                </TouchableOpacity>
+
+                {/* CENTER: Capture */}
+                <TouchableOpacity style={styles.captureButton} onPress={handleTakePhoto}>
+                  <View style={styles.captureButtonInner} />
+                </TouchableOpacity>
+
+                {/* RIGHT: Submit Photo (disabled because no photo yet) */}
+                <TouchableOpacity style={[styles.roundButton, { opacity: 0.5 }]} disabled={true}>
+                  <Ionicons name="checkmark" size={28} color="white" />
+                </TouchableOpacity>
+              </View>
+            </View>
+          </CameraView>
+        </View>
       </View>
     );
   }
@@ -437,7 +471,7 @@ import React, { useRef, useState, useEffect } from 'react';
       borderRadius: 12,
       marginHorizontal: 5,
       position: 'relative',
-      overflow: 'hidden',
+      overflow: 'visible', // Changed from 'hidden' to show delete button
       elevation: 3,
     },
     thumbnail: {
@@ -449,14 +483,16 @@ import React, { useRef, useState, useEffect } from 'react';
     },
     deleteButton: {
       position: 'absolute',
-      top: 0,
-      right: 0,
+      top: 2,
+      right: 2,
       backgroundColor: 'rgba(0,0,0,0.6)',
-      width: 20,
-      height: 20,
-      borderRadius: 10,
+      width: 24, // Increased from 20
+      height: 24, // Increased from 20
+      borderRadius: 12,
       justifyContent: 'center',
       alignItems: 'center',
+      zIndex: 2, // Ensure it's above the image
+      elevation: 4, // For Android
     },
     thumbnailIndicator: {
       position: 'absolute',
@@ -489,7 +525,7 @@ import React, { useRef, useState, useEffect } from 'react';
       backgroundColor: 'transparent',
     },
     labelGuideBox: {
-      borderColor: '#f5dd4b', // Yellow
+      borderColor: 'lightgreen', // Yellow
       width: '70%',
       height: '60%'
     },
@@ -498,27 +534,32 @@ import React, { useRef, useState, useEffect } from 'react';
     },
 
     // Bottom "Labels/Fruits" switch
-    modeSelectorBottom: {
+    modeSelectorWrapper: {
       position: 'absolute',
-      top: 160, // Increase this value to move it higher up
+      top: 20,
       left: 0,
       right: 0,
-      backgroundColor: 'transparent',
+      zIndex: 10,
       alignItems: 'center',
-      zIndex: 15,
+    },
+    modeSelectorBottom: {
+      alignItems: 'center',
     },
     switchContainer: {
       flexDirection: 'row',
       alignItems: 'center',
       justifyContent: 'center',
       backgroundColor: 'rgba(0,0,0,0.6)',
-      paddingVertical: 10,
-      paddingHorizontal: 20,
+      paddingVertical: 8,
+      paddingHorizontal: 16,
       borderRadius: 25,
+      maxWidth: 250,
+      marginHorizontal: 'auto',
     },
     switchLabel: {
       color: '#999',
-      marginHorizontal: 10,
+      marginHorizontal: 8,
+      fontSize: 14,
       fontWeight: '500',
     },
     activeSwitchLabel: {
@@ -581,5 +622,21 @@ import React, { useRef, useState, useEffect } from 'react';
       alignItems: 'center',
       paddingHorizontal: 20,
       paddingVertical: 10,
-    }
+    },
+    cameraWrapper: {
+      flex: 1,
+      position: 'relative',
+    },
+    thumbnailsContainer: {
+      backgroundColor: '#FFFFFF',
+      zIndex: 10,
+    },
+    topSection: {
+      backgroundColor: '#FFFFFF',
+      zIndex: 10,
+    },
+    mainSection: {
+      flex: 1,
+      position: 'relative',
+    },
   });

@@ -19,6 +19,7 @@ import { useNavigation } from 'expo-router';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '@/types/types';
 import * as MediaLibrary from 'expo-media-library';
+import axios from 'axios';
 
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
@@ -60,12 +61,24 @@ function Feedback() {
     
       const loadRecentPhotos = async () => {
         try {
+          // First, get the NutriVision album
+          const album = await MediaLibrary.getAlbumAsync("NutriVision");
+          
+          // If the album doesn't exist yet, return empty array
+          if (!album) {
+            console.log('NutriVision album not found');
+            setCapturedPhotos([]);
+            return;
+          }
+          
+          // Get assets from the NutriVision album specifically
           const { assets } = await MediaLibrary.getAssetsAsync({
+            album: album.id,
             first: 5,
             mediaType: 'photo',
             sortBy: ['creationTime']
           });
-    
+      
           const recentPhotos = [];
           for (const asset of assets) {
             let uriToUse = asset.uri;
@@ -86,12 +99,12 @@ function Feedback() {
               orientation: Math.random() > 0.5 ? 'vertical' : 'horizontal'
             });
           }
-    
-          setCapturedPhotos(recentPhotos.slice(0, 5).filter(photo => 
+      
+          setCapturedPhotos(recentPhotos.filter(photo => 
             photo.uri && typeof photo.uri === 'string'
           ));
         } catch (error) {
-          console.error('Error loading recent photos:', error);
+          console.error('Error loading photos from NutriVision album:', error);
         }
       };
     
@@ -200,8 +213,16 @@ function Feedback() {
                           </View>
                           <ImageLoop />
                         </View>  
-                      </View>
-                                                        
+                        <View style={styles.FeedbackContainer}>  
+                          <View style={styles.textContainer}>
+                            <Text>
+                              to follow up dependent on the user input.
+                            </Text>
+                          </View>
+                        </View>
+                    </View>
+                      
+                                                   
                 </ScrollView>                
             </KeyboardAvoidingView>
             <TouchableOpacity style={styles.checkButton} onPress={handleCheck}>
@@ -234,6 +255,30 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     width: SCREEN_WIDTH * 0.9,
     height: 70,
+    paddingVertical: 10,
+    borderRadius: 10,
+    justifyContent: 'space-between', // Changed from 'center' to better distribute content
+    alignItems: 'center', // Added to vertically center items
+    backgroundColor: 'white', // Match the container background color
+    // Use platform-specific styling for consistent shadows
+    ...Platform.select({
+    ios: {
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.1,
+      shadowRadius: 6,
+    },
+    android: {
+      elevation: 4,
+    },
+    }),
+    paddingHorizontal: 15, // Add some horizontal padding
+    marginBottom: 15, // Add some margin between items
+  },
+  FeedbackContainer: {
+    flexDirection: 'row',
+    width: SCREEN_WIDTH * 0.9,
+    height: 320,
     paddingVertical: 10,
     borderRadius: 10,
     justifyContent: 'space-between', // Changed from 'center' to better distribute content

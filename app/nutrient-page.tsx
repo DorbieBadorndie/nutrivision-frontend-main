@@ -21,7 +21,7 @@ import * as MediaLibrary from 'expo-media-library';
 
 const { width, height } = Dimensions.get('window');
 
-type HomeScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Index'>;
+type HomeScreenNavigationProp = StackNavigationProp<RootStackParamList, 'index'>;
 
 export default function UserNutrientPage() {
   const [fontsLoaded] = useFonts({

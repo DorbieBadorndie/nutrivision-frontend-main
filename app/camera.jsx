@@ -63,7 +63,7 @@ import React, { useRef, useState, useEffect } from 'react';
     function handleGoBack() {
       // Replace with your actual navigation go-back, e.g.:
       // navigation.goBack();
-      console.log('Go back pressed');
+      console.log('Go back pressed'); 
     }
 
     function toggleMode() {

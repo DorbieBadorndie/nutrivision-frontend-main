@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { SafeAreaView, Image, StyleSheet, View, Dimensions } from 'react-native';
+import { SafeAreaView, Image, StyleSheet, View, Dimensions, Platform } from 'react-native';
 import * as FileSystem from 'expo-file-system';
 
 const { width, height } = Dimensions.get('window');

@@ -37,11 +37,73 @@ import React, { useRef, useState, useEffect } from 'react';
 
     const cameraRef = useRef(null);
 
+    // Add this function inside the Camera component before the useEffect
+    const loadExistingPhotos = async () => {
+      try {
+        const { status } = await MediaLibrary.requestPermissionsAsync();
+        if (status !== 'granted') {
+          console.log('Media library permission not granted');
+          return;
+        }
+    
+        const album = await MediaLibrary.getAlbumAsync("NutriVision");
+        if (!album) {
+          console.log('NutriVision album not found');
+          return;
+        }
+    
+        const { assets } = await MediaLibrary.getAssetsAsync({
+          album: album.id,
+          mediaType: ['photo'],
+          first: 5, // Limit to 5 most recent photos
+          sortBy: ['creationTime'],
+          reverse: true
+        });
+    
+        // Transform assets into the format expected by capturedPhotos
+        const photos = await Promise.all(assets.map(async (asset) => {
+          // For iOS, get the local filesystem URL instead of ph:// URL
+          if (Platform.OS === 'ios') {
+            try {
+              // Get the local filesystem URL
+              const localUri = await MediaLibrary.getAssetInfoAsync(asset.id);
+              return {
+                uri: localUri.localUri || asset.uri, // Use localUri if available, fallback to asset.uri
+                type: 'label',
+                id: asset.id
+              };
+            } catch (error) {
+              console.error('Error getting local URI:', error);
+              return null;
+            }
+          }
+    
+          // For Android, use the asset URI directly
+          return {
+            uri: asset.uri,
+            type: 'label',
+            id: asset.id
+          };
+        }));
+    
+        // Filter out any null entries and set the photos
+        const validPhotos = photos.filter(photo => photo !== null);
+        setCapturedPhotos(validPhotos);
+    
+      } catch (error) {
+        console.error('Error loading existing photos:', error);
+      }
+    };
+
     // Request media library permissions on mount
     useEffect(() => {
       (async () => {
         const { status } = await MediaLibrary.requestPermissionsAsync();
         setMediaLibraryPermission(status === 'granted');
+        
+        if (status === 'granted') {
+          await loadExistingPhotos();
+        }
       })();
     }, []);
 
@@ -111,7 +173,7 @@ import React, { useRef, useState, useEffect } from 'react';
 
     const handleSavePhoto = async (processedUri) => {
       if (!photo) return;
-
+    
       try {
         const { status } = await MediaLibrary.requestPermissionsAsync();
         if (status !== 'granted') {
@@ -121,11 +183,11 @@ import React, { useRef, useState, useEffect } from 'react';
           );
           return;
         }
-
+    
         // Use the processed URI if available, otherwise the original
         const uriToSave = processedUri || photo.uri;
         const asset = await MediaLibrary.createAssetAsync(uriToSave);
-
+    
         // Save to "NutriVision" album
         let album = await MediaLibrary.getAlbumAsync("NutriVision");
         if (!album) {
@@ -133,12 +195,18 @@ import React, { useRef, useState, useEffect } from 'react';
         } else {
           await MediaLibrary.addAssetsToAlbumAsync([asset], album, false);
         }
-
-        // Update local state (limit to 5)
-        setCapturedPhotos((prev) => [photo, ...prev].slice(0, 5));
-
+    
+        // Update local state with asset ID
+        const photoWithId = {
+          ...photo,
+          uri: asset.uri,
+          id: asset.id
+        };
+        
+        setCapturedPhotos((prev) => [photoWithId, ...prev].slice(0, 5));
+    
         Alert.alert('Success', 'Photo saved to your gallery in NutriVision!');
-        setPhoto(null); // Return to camera mode
+        setPhoto(null);
       } catch (error) {
         console.error('Error saving photo to gallery:', error);
         Alert.alert('Error', 'Failed to save photo to gallery.');
@@ -147,29 +215,77 @@ import React, { useRef, useState, useEffect } from 'react';
 
     const handleDeletePhoto = async (photoToDelete, index) => {
       try {
-        // Get the album
-        const album = await MediaLibrary.getAlbumAsync("NutriVision");
-        if (!album) return;
+        // First check for permissions
+        const { status } = await MediaLibrary.requestPermissionsAsync();
+        if (status !== 'granted') {
+          Alert.alert(
+            'Permission required',
+            'We need permission to delete photos from your gallery.'
+          );
+          return;
+        }
     
-        // Find and delete the asset from the device
-        const assets = await MediaLibrary.getAssetsAsync({
+        // On iOS, we can directly delete using the asset ID
+        if (photoToDelete.id) {
+          try {
+            const success = await MediaLibrary.deleteAssetsAsync([photoToDelete.id]);
+            if (success) {
+              // Remove from thumbnails after successful gallery deletion
+              setCapturedPhotos(prev => prev.filter((_, i) => i !== index));
+              console.log('Photo deleted successfully');
+            } else {
+              Alert.alert('Error', 'Failed to delete photo from gallery');
+            }
+          } catch (deleteError) {
+            console.error('Error deleting asset:', deleteError);
+            Alert.alert('Error', 'Failed to delete photo');
+          }
+          return;
+        }
+    
+        // Fallback method if no ID is available
+        const album = await MediaLibrary.getAlbumAsync("NutriVision");
+        if (!album) {
+          console.log('NutriVision album not found');
+          return;
+        }
+    
+        const { assets } = await MediaLibrary.getAssetsAsync({
           album: album.id,
-          mediaType: 'photo'
+          mediaType: ['photo'],
+          first: 50,
+          sortBy: ['creationTime'],
+          reverse: true // Get most recent first
         });
     
-        const assetToDelete = assets.assets.find(
-          asset => asset.uri === photoToDelete.uri
+        if (assets.length === 0) {
+          console.log('No assets found in album');
+          return;
+        }
+    
+        // Find matching asset by comparing URIs
+        const assetToDelete = assets.find(asset => 
+          asset.uri.replace('ph://', '') === photoToDelete.uri.replace('ph://', '')
         );
     
         if (assetToDelete) {
-          await MediaLibrary.deleteAssetsAsync([assetToDelete]);
+          const success = await MediaLibrary.deleteAssetsAsync([assetToDelete]);
+          if (success) {
+            setCapturedPhotos(prev => prev.filter((_, i) => i !== index));
+            console.log('Photo deleted successfully');
+          } else {
+            Alert.alert('Error', 'Failed to delete photo from gallery');
+          }
+        } else {
+          Alert.alert('Error', 'Could not find photo in gallery');
         }
     
-        // Remove from local state
-        setCapturedPhotos(prev => prev.filter((_, i) => i !== index));
       } catch (error) {
-        console.error('Error deleting photo:', error);
-        Alert.alert('Error', 'Failed to delete photo');
+        console.error('Error in handleDeletePhoto:', error);
+        Alert.alert(
+          'Error',
+          'Failed to delete photo. Please try again.'
+        );
       }
     };
 
@@ -206,7 +322,14 @@ import React, { useRef, useState, useEffect } from 'react';
             <ScrollView horizontal showsHorizontalScrollIndicator={false}>
               {capturedPhotos.map((item, index) => (
                 <View key={index} style={styles.thumbnailContainer}>
-                  <Image source={{ uri: item.uri }} style={styles.thumbnail} />
+                  <Image 
+                    source={{ 
+                      uri: Platform.OS === 'ios' ? 
+                        item.uri.replace('ph://', 'file://') : 
+                        item.uri 
+                    }} 
+                    style={styles.thumbnail}
+                  />
                   <TouchableOpacity
                     style={styles.deleteButton}
                     onPress={() => handleDeletePhoto(item, index)}

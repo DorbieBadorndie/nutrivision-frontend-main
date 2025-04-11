@@ -70,6 +70,9 @@ export default function HomeScreen() {
   const [isFt, setIsFt] = useState(true); // true => ft, false => cm
   const toggleHeightUnit = () => setIsFt(prev => !prev);
 
+  // ======== GENDER STATE (NEW) ========
+  const [isMale, setIsMale] = useState(true); // true: Male, false: Female
+
   // ======== NAVIGATION ========
   const navigation = useNavigation<HomeScreenNavigationProp>();
 
@@ -115,16 +118,15 @@ export default function HomeScreen() {
         keyboardVerticalOffset={Platform.OS === 'ios' ? 20 : 0} // Adjust as needed
       >
         <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
-          
-            <ScrollView contentContainerStyle={{ flexGrow: 1 }} keyboardShouldPersistTaps="handled">
-              {/* Background/Top Image */}
-              <Image
-                source={require('@/assets/images/NutriVision.png')}
-                style={styles.image}
-                accessibilityRole="image"
-                accessibilityLabel="NutriVision logo"
-              />
-              <ThemedView style={[styles.container, { backgroundColor: '#eff1f6' }]}>
+          <ScrollView contentContainerStyle={{ flexGrow: 1, paddingBottom: 100 }} keyboardShouldPersistTaps="handled">
+            {/* Background/Top Image */}
+            <Image
+              source={require('@/assets/images/NutriVision.png')}
+              style={styles.image}
+              accessibilityRole="image"
+              accessibilityLabel="NutriVision logo"
+            />
+            <ThemedView style={[styles.container, { backgroundColor: '#eff1f6' }]}>
               {/* Logo kept from original */}
               {/* ===== NEW PROFILE BOX ===== */}
               <View style={styles.profileBox}>
@@ -167,7 +169,8 @@ export default function HomeScreen() {
                     </ThemedText>
                   </View>
                 </View>
-
+                  
+                {/* Right Column for Counter */}
                 <View style={styles.rightColumn}>
                   <View style={styles.formContainer}>
                     <View style={styles.counterWrapper}>
@@ -202,6 +205,38 @@ export default function HomeScreen() {
                     )}
                   </View>
                 </View>
+              </View>
+
+              {/*============ GENDER CONTAINER (UPDATED) =============== */}
+              <View style={styles.ageContainer}>
+                <View style={styles.leftColumn}>
+                  <View style={styles.topLeft}>
+                    <ThemedText style={styles.containerTitle}>Gender</ThemedText>
+                  </View>
+                  <View style={styles.bottomLeft}>
+                    <ThemedText style={styles.containerSubtitle}>
+                      Gender influences nutrition through hormonal and physiological differences.
+                    </ThemedText>
+                  </View>
+                </View>
+                
+                {/* Right Column for Gender Switch */}
+                {/* Right Column for Gender Switch */}
+<View style={styles.rightColumn}>
+  <View style={styles.formContainer}>
+    <Switch
+      trackColor={{ false: '#e0e0e0', true: '#e0e0e0' }}
+      thumbColor={'#9AB106'}
+      style={[styles.switch, { transform: [{ scaleX: 0.75 }, { scaleY: 0.75 }] }]}
+      value={isMale}
+      onValueChange={(value) => setIsMale(value)}
+    />
+    <ThemedText style={{ fontSize: 14, marginTop: 8 }}>
+      {isMale ? 'Male' : 'Female'}
+    </ThemedText>
+  </View>
+</View>
+
               </View>
 
               {/* =============== WEIGHT CONTAINER =============== */}
@@ -241,7 +276,7 @@ export default function HomeScreen() {
                   </View>
                 </View>
               </View>
-             
+              
               {/* =============== HEIGHT CONTAINER =============== */}
               <View style={styles.heightContainer}>
                 <View style={styles.leftColumn}>
@@ -275,18 +310,13 @@ export default function HomeScreen() {
                         onValueChange={toggleHeightUnit}
                       />
                       <ThemedText style={styles.switchLabel}>cm</ThemedText>
-                      
                     </View>
-                    
                   </View>
-                  
                 </View>
               </View>
-               </ThemedView>
-            </ScrollView>
-            
+            </ThemedView>
+          </ScrollView>
         </TouchableWithoutFeedback>
-        
       </KeyboardAvoidingView>
       
       {/* Floating check button outside the KeyboardAvoidingView */}
@@ -474,7 +504,6 @@ const styles = StyleSheet.create({
   },
   switch: {
     transform: [{ scaleX: 0.6 }, { scaleY: 0.6 }],
-    
   },
   checkButton: {
     position: 'absolute',

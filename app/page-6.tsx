@@ -308,8 +308,9 @@ const styles = StyleSheet.create({
     backgroundColor: '#9AB106',
   },
   legendText: {
-    fontSize: 14,
+    fontSize: 18,
     color: '#333',
+    fontWeight: 'bold',
   },
   nutrientRow: {
     flexDirection: 'row',
@@ -323,7 +324,6 @@ const styles = StyleSheet.create({
   },
   nutrientText: {
     fontSize: 14,
-    fontWeight: 'bold',
     color: '#333',
     marginRight: 8,
   },
@@ -406,6 +406,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#333',
   },
+
   totalBox: {
     backgroundColor: '#f8e4e4',
     padding: 12,

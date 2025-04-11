@@ -1,5 +1,6 @@
 // ApiContext.tsx
 import React, { createContext, useState, useContext, ReactNode } from 'react';
+import axios from 'axios';
 
 // Define types for our context
 interface ImageToUpload {
@@ -29,66 +30,54 @@ interface ApiProviderProps {
 export function ApiProvider({ children }: ApiProviderProps): JSX.Element {
   // State for storing uploaded images data
   const [uploadedImages, setUploadedImages] = useState<ImageToUpload[]>([]);
-
-  const urlToUse = 'https://nutrivision-backend-textrecog-77tx.onrender.com/extract/';
-  
   // State for storing API response data
   const [extractedData, setExtractedData] = useState<any | null>(null);
-  
   // State for tracking loading status
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  
   // State for errors
   const [error, setError] = useState<string | null>(null);
 
-  // Function to upload images to the API endpoint
+  // Function to upload images to the API endpoint using axios
   const uploadImages = async (images: ImageToUpload[]): Promise<any> => {
     setIsLoading(true);
     setError(null);
-    
+
     try {
       const formData = new FormData();
-      
+
       // Append each image to the form data
-      images.forEach((image, index) => {
-        // Get just the filename from the URI
+      images.forEach((image) => {
+        // Extract the filename from the URI if not already provided
         const uriParts = image.uri.split('/');
         const fileName = image.name || uriParts[uriParts.length - 1];
-        
-        // Determine file type
+        // Determine the file MIME type (example: image/jpeg)
         const match = /\.(\w+)$/.exec(fileName);
         const type = image.type || (match ? `image/${match[1]}` : 'image/jpeg');
-        
-        // Append to form data - note FormData handling is different in React Native
+
+        // Append to form data – note that React Native FormData works a bit differently
         formData.append('files', {
           uri: image.uri,
           name: fileName,
-          type: type
-        } as unknown as Blob); // Type assertion needed for React Native FormData
+          type: type,
+        } as any); // Using "any" as a workaround for FormData types in RN
       });
 
-      // Make the POST request
-      const response = await fetch(urlToUse, {
-        method: 'POST',
-        body: formData,
-        headers: {
-          'Accept': 'application/json',
-          //'Content-Type': 'multipart/form-data',
-        },
-      });
+      // Use axios.post to upload data to the given endpoint
+      const response = await axios.post(
+        'https://nutrivision-backend-textrecog-77tx.onrender.com/extract',
+        formData,
+        {
+          headers: {
+            Accept: 'application/json',
+            'Content-Type': 'multipart/form-data',
+          },
+        }
+      );
 
-      if (!response.ok) {
-        throw new Error(`API error with status ${response.status}`);
-      }
-
-      // Parse the response
-      const result = await response.json();
-      
       // Update state with the response data
-      setExtractedData(result);
+      setExtractedData(response.data);
       setUploadedImages(images);
-      return result;
-      
+      return response.data;
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to upload images';
       setError(errorMessage);
@@ -113,14 +102,17 @@ export function ApiProvider({ children }: ApiProviderProps): JSX.Element {
     isLoading,
     error,
     uploadImages,
-    clearData
+    clearData,
   };
 
-  return (
-    <ApiContext.Provider value={value}>
-      {children}
-    </ApiContext.Provider>
-  );
+  return <ApiContext.Provider value={value}>{children}</ApiContext.Provider>;
 }
 
-// Custom hook for using this
+// Custom hook for using this context
+export function useApi(): ApiContextState {
+  const context = useContext(ApiContext);
+  if (context === undefined) {
+    throw new Error('useApi must be used within an ApiProvider');
+  }
+  return context;
+}

@@ -23,22 +23,112 @@ import React, { useRef, useState, useEffect, createContext, useContext } from 'r
   import { useNavigation } from '@react-navigation/native';
   import { StackNavigationProp } from '@react-navigation/stack';
   import { useIsFocused } from '@react-navigation/native';
-
+  import  {ApiProvider, useApi} from '@/hooks/ApiContext';
+  import axios from 'axios';
   import PhotoPreviewSection from '@/components/PhotoPreviewSection';
   import { navigate } from 'expo-router/build/global-state/routing';
 
   const { height } = Dimensions.get('window');
 
+  export async function uploadImagesAxios(images) {
+    try {
+      const formData = new FormData();
+  
+      images.forEach((image) => {
+        const uriParts = image.uri.split('/');
+        const fileName = image.name || uriParts[uriParts.length - 1];
+        const match = /\.(\w+)$/.exec(fileName);
+        const type = image.type || (match ? `image/${match[1]}` : 'image/jpeg');
+  
+        formData.append('files', {
+          uri: image.uri,
+          name: fileName,
+          type: type,
+        }, 'true');
+      });
+  
+      const response = await axios.post(
+        'https://nutrivision-backend-textrecog-77tx.onrender.com/extract/',
+        formData,
+        {
+          headers: {
+            Accept: 'application/json',
+            'Content-Type': 'multipart/form-data',
+          },
+        }
+      );
+      console.log("sent images");
+      return response.data;
+    } catch (err) {
+      console.error('Axios upload error:', err);
+      throw err;
+    }
+  }
+
   export default function Camera() {
-    const MyContext = createContext();
+    //const MyContext = createContext();
     const [permission, requestPermission] = useCameraPermissions();
     const [photo, setPhoto] = useState(null);
     const [isLabelMode, setIsLabelMode] = useState(true); // Default to label mode
     const [capturedPhotos, setCapturedPhotos] = useState([]);
     const [mediaLibraryPermission, setMediaLibraryPermission] = useState(null);
+    //const { uploadImages, isLoading } = useApi();
 
     // Always vertical (portrait) orientation. No toggle.
     const boxOrientation = 'vertical';
+
+
+    const handleSubmitPhoto = async (photos) => {
+      console.log('Button clicked, starting image submission...');
+    
+      if (!photos || photos.length === 0) {
+        console.log('No photos provided for submission.');
+        return;
+      }
+    
+      // Create a new FormData object
+      const formData = new FormData();
+    
+      for (let i = 0; i < photos.length; i++) {
+        const photo = photos[i];
+        const uriParts = photo.uri.split('.');
+        const fileType = uriParts[uriParts.length - 1];
+        
+        // Properly append file to FormData
+        formData.append('files', {
+          uri: photo.uri,
+          name: `photo_${i}.${fileType}`,
+          type: `image/${fileType}`
+        });
+      }
+    
+      console.log('FormData constructed with', photos.length, 'files.');
+    
+      try {
+        console.log('Sending request to backend endpoint...');
+        
+        // Let axios set the Content-Type header automatically with the boundary
+        const response = await axios.post(
+          'https://nutrivision-backend-textrecog-77tx.onrender.com/extract/',
+          formData,
+          {
+            // Don't set Content-Type header at all, let axios handle it
+            headers: {
+              'Accept': 'application/json'
+            }
+          }
+        );
+        console.log('✅ Response from server:', response.data);
+        return response.data;
+      } catch (err) {
+        console.error('❌ Axios upload error:', err);
+        if (err.response) {
+          console.error('Error details:', err.response.data);
+          console.error('Status code:', err.response.status);
+        }
+        throw err;
+      }
+    };
 
     const navigation = useNavigation();
     // Always use the back camera. No toggle.
@@ -103,6 +193,8 @@ import React, { useRef, useState, useEffect, createContext, useContext } from 'r
         console.error('Error loading existing photos:', error);
       }
     };
+
+    
 
     // Request media library permissions on mount
     useEffect(() => {
@@ -197,7 +289,7 @@ import React, { useRef, useState, useEffect, createContext, useContext } from 'r
         // Use the processed URI if available, otherwise the original
         const uriToSave = processedUri || photo.uri;
         const asset = await MediaLibrary.createAssetAsync(uriToSave);
-    
+        
         // For iOS, get the proper local URI
         let localUri = asset.uri;
         if (Platform.OS === 'ios') {
@@ -344,7 +436,8 @@ import React, { useRef, useState, useEffect, createContext, useContext } from 'r
 
     // Update the return statement layout
     return (
-      <View style={styles.container}>
+      <ApiProvider>
+        <View style={styles.container}>
         {/* Top section for thumbnails */}
         <View style={styles.topSection}>
           <SafeAreaView>
@@ -430,7 +523,7 @@ import React, { useRef, useState, useEffect, createContext, useContext } from 'r
                 </TouchableOpacity>
 
                 {/* RIGHT: Submit Photo (disabled because no photo yet) */}
-                <TouchableOpacity style={[styles.roundButton, { opacity: 0.5 }]} disabled={true}>
+                <TouchableOpacity style={[styles.roundButton, { opacity: 1 }]} onPress={() => handleSubmitPhoto(capturedPhotos)} disabled={false}>
                   <Ionicons name="checkmark" size={28} color="white" />
                 </TouchableOpacity>
               </View>
@@ -438,6 +531,7 @@ import React, { useRef, useState, useEffect, createContext, useContext } from 'r
           </CameraView>
         </View>
       </View>
+      </ApiProvider>
     );
   }
 

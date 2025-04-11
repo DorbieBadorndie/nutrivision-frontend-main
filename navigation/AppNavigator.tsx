@@ -13,21 +13,19 @@ import { ApiProvider } from '@/hooks/ApiContext';
 
 const Stack = createStackNavigator<RootStackParamList>();
 
-const ApiContext = createContext({});
-
 export default function AppNavigator() {
   return (
     <ApiProvider>
       <NavigationContainer>
-      <Stack.Navigator initialRouteName="index">
-        <Stack.Screen name="index" component={index} />
-        <Stack.Screen name="page-6" component={Page6} />
-        <Stack.Screen name="page-2" component={Page2} />
-        <Stack.Screen name="nutrient-page" component={UserNutrientPage} />
-        <Stack.Screen name="camera" component={Camera} />
-        <Stack.Screen name="feedback" component={Feedback} />
-      </Stack.Navigator>
-    </NavigationContainer>
+        <Stack.Navigator initialRouteName="index">
+          <Stack.Screen name="index" component={index} />
+          <Stack.Screen name="page-6" component={Page6} />
+          <Stack.Screen name="page-2" component={Page2} />
+          <Stack.Screen name="nutrient-page" component={UserNutrientPage} />
+          <Stack.Screen name="camera" component={Camera} />
+          <Stack.Screen name="feedback" component={Feedback} />
+        </Stack.Navigator>
+      </NavigationContainer>
     </ApiProvider>
   );
 }

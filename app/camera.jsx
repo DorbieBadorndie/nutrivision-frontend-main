@@ -62,23 +62,21 @@ import React, { useRef, useState, useEffect } from 'react';
     
         // Transform assets into the format expected by capturedPhotos
         const photos = await Promise.all(assets.map(async (asset) => {
-          // For iOS, get the local filesystem URL instead of ph:// URL
           if (Platform.OS === 'ios') {
             try {
-              // Get the local filesystem URL
-              const localUri = await MediaLibrary.getAssetInfoAsync(asset.id);
+              // Get the asset info which contains the local URI
+              const assetInfo = await MediaLibrary.getAssetInfoAsync(asset);
               return {
-                uri: localUri.localUri || asset.uri, // Use localUri if available, fallback to asset.uri
+                uri: assetInfo.localUri || asset.uri,
                 type: 'label',
                 id: asset.id
               };
             } catch (error) {
-              console.error('Error getting local URI:', error);
+              console.error('Error getting asset info:', error);
               return null;
             }
           }
     
-          // For Android, use the asset URI directly
           return {
             uri: asset.uri,
             type: 'label',
@@ -86,7 +84,6 @@ import React, { useRef, useState, useEffect } from 'react';
           };
         }));
     
-        // Filter out any null entries and set the photos
         const validPhotos = photos.filter(photo => photo !== null);
         setCapturedPhotos(validPhotos);
     
@@ -177,16 +174,29 @@ import React, { useRef, useState, useEffect } from 'react';
       try {
         const { status } = await MediaLibrary.requestPermissionsAsync();
         if (status !== 'granted') {
-          Alert.alert(
-            'Permission required',
-            'We need permission to access your photo library to save photos.'
-          );
+          Alert.alert('Permission required', 'We need permission to access your photo library to save photos.');
           return;
         }
     
         // Use the processed URI if available, otherwise the original
         const uriToSave = processedUri || photo.uri;
         const asset = await MediaLibrary.createAssetAsync(uriToSave);
+    
+        // For iOS, get the proper local URI
+        let localUri = asset.uri;
+        if (Platform.OS === 'ios') {
+          try {
+            const assetInfo = await MediaLibrary.getAssetInfoAsync(asset);
+            // Convert the URI to a format that Image component can use
+            localUri = assetInfo.localUri || assetInfo.uri;
+            if (localUri.startsWith('ph://')) {
+              localUri = `file://${localUri.replace('ph://', '')}`;
+            }
+          } catch (error) {
+            console.error('Error getting asset info:', error);
+            localUri = asset.uri; // Fallback to original URI
+          }
+        }
     
         // Save to "NutriVision" album
         let album = await MediaLibrary.getAlbumAsync("NutriVision");
@@ -196,19 +206,20 @@ import React, { useRef, useState, useEffect } from 'react';
           await MediaLibrary.addAssetsToAlbumAsync([asset], album, false);
         }
     
-        // Update local state with asset ID
+        // Update local state with proper URI
         const photoWithId = {
           ...photo,
-          uri: asset.uri,
-          id: asset.id
+          uri: localUri,
+          id: asset.id,
+          type: photo.type || 'label'
         };
-        
-        setCapturedPhotos((prev) => [photoWithId, ...prev].slice(0, 5));
     
+        setCapturedPhotos(prev => [photoWithId, ...prev].slice(0, 5));
         Alert.alert('Success', 'Photo saved to your gallery in NutriVision!');
         setPhoto(null);
+    
       } catch (error) {
-        console.error('Error saving photo to gallery:', error);
+        console.error('Error saving photo:', error);
         Alert.alert('Error', 'Failed to save photo to gallery.');
       }
     };
@@ -324,11 +335,13 @@ import React, { useRef, useState, useEffect } from 'react';
                 <View key={index} style={styles.thumbnailContainer}>
                   <Image 
                     source={{ 
-                      uri: Platform.OS === 'ios' ? 
-                        item.uri.replace('ph://', 'file://') : 
-                        item.uri 
+                      uri: Platform.OS === 'ios' 
+                        ? `file://${item.uri.replace('ph://', '').replace('file://', '')}`
+                        : item.uri 
                     }} 
                     style={styles.thumbnail}
+                    resizeMode="cover"
+                    onError={(e) => console.log('Image loading error:', e.nativeEvent.error)}
                   />
                   <TouchableOpacity
                     style={styles.deleteButton}

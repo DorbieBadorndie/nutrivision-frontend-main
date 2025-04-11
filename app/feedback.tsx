@@ -37,6 +37,7 @@ function Feedback() {
     const [sugar, setSugar] = useState<sugar>({sugar: 0, approxSugar: 0, sugarTablespoon: 0});
     const [sodium, setSodium] = useState<sodium>({sodium: 0, approxSodium: 0, sodiumTablespoon: 0});
     const [calories, setCalories] = useState<calories>({calories: 0, approxCalories: 0, caloriesTablepoon: 0});
+    const [requrestMessage, setRequestMessage] = useState<string>('');
     // Request media library permissions on mount
       useEffect(() => {
         (async () => {
@@ -113,16 +114,26 @@ function Feedback() {
         navigation.navigate('index');
       };
 
-      const ImageLoop = () => {
-        return (
-          <View style={styles.rightContainer}> 
-            <Image
-              source={require('@/assets/images/1 green.png')}
-              style={styles.image}
-            />
-          </View>
-        );
-      };
+    const testRequest = async () => {
+      const [response, setResponse] = useState('');
+
+      const handleSubmit = () =>{
+        // axios.get()
+      }
+    };
+
+    function SpoonImages({ spoonDisplay }: { spoonDisplay: number }) {
+      let imageToDisplay = require('@/assets/images/neutral.png'); // Default image
+
+      return (
+        <View style={styles.rightContainer}> 
+          <Image
+            source={imageToDisplay}
+            style={styles.image}
+          />
+        </View>
+      );
+    };
       
     return (
         <SafeAreaView style={styles.safeContainer}>
@@ -181,7 +192,7 @@ function Feedback() {
                               Equivalent to: {sugar.sugarTablespoon} tablespoons
                             </Text>
                           </View>
-                          <ImageLoop />
+                          <SpoonImages spoonDisplay={1} />
                         </View>
                         {/* sodium table */}
                         <View style={styles.sugarContainer}>
@@ -196,7 +207,7 @@ function Feedback() {
                               Equivalent to: {sodium.approxSodium} tablespoons
                             </Text>
                           </View>
-                          <ImageLoop />
+                          <SpoonImages spoonDisplay={1} />
                       </View>  
                       {/* calories table */}
                       <View style={styles.sugarContainer}>
@@ -211,7 +222,7 @@ function Feedback() {
                               Equivalent to: {calories.caloriesTablepoon} tablespoons
                             </Text>
                           </View>
-                          <ImageLoop />
+                          <SpoonImages spoonDisplay={1} />
                         </View>  
                         <View style={styles.FeedbackContainer}>  
                           <View style={styles.textContainer}>

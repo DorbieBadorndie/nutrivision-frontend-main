@@ -85,13 +85,13 @@ const styles = StyleSheet.create({
   labelWrapper: {
     borderColor: '#f5dd4b',
     borderWidth: 3,
-    width: '70%',
-    height: '60%',
+    width: '70%', // Match camera module's cropWidth
+    height: '60%', // Match camera module's cropHeight
     backgroundColor: 'transparent',
     justifyContent: 'center',
     alignItems: 'center',
     overflow: 'hidden',
-    marginTop: '-50%'
+    // Remove marginTop to match camera cropping
   },
   fruitWrapper: {
     width: '100%',

@@ -13,7 +13,8 @@ import React, { useRef, useState, useEffect } from 'react';
     Switch, 
     Image, 
     ScrollView,
-    Platform 
+    Platform,
+    SafeAreaView
   } from 'react-native';
   import { CameraView, useCameraPermissions } from 'expo-camera';
   import * as MediaLibrary from 'expo-media-library';
@@ -144,6 +145,34 @@ import React, { useRef, useState, useEffect } from 'react';
       }
     };
 
+    const handleDeletePhoto = async (photoToDelete, index) => {
+      try {
+        // Get the album
+        const album = await MediaLibrary.getAlbumAsync("NutriVision");
+        if (!album) return;
+    
+        // Find and delete the asset from the device
+        const assets = await MediaLibrary.getAssetsAsync({
+          album: album.id,
+          mediaType: 'photo'
+        });
+    
+        const assetToDelete = assets.assets.find(
+          asset => asset.uri === photoToDelete.uri
+        );
+    
+        if (assetToDelete) {
+          await MediaLibrary.deleteAssetsAsync([assetToDelete]);
+        }
+    
+        // Remove from local state
+        setCapturedPhotos(prev => prev.filter((_, i) => i !== index));
+      } catch (error) {
+        console.error('Error deleting photo:', error);
+        Alert.alert('Error', 'Failed to delete photo');
+      }
+    };
+
     // --- If we have a photo, show preview with "Back" + "Submit" buttons. ---
     if (photo) {
       return (
@@ -172,30 +201,29 @@ import React, { useRef, useState, useEffect } from 'react';
     return (
       <View style={styles.container}>
         {/* Thumbnails Row: Only photos captured by this module, limited to 5 */}
-        <View style={styles.thumbnailsRow}>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-            {capturedPhotos.map((item, index) => (
-              <View key={index} style={styles.thumbnailContainer}>
-                <Image source={{ uri: item.uri }} style={styles.thumbnail} />
-                <TouchableOpacity
-                  style={styles.deleteButton}
-                  onPress={() => {
-                    // Delete from local state
-                    setCapturedPhotos((prev) => prev.filter((_, i) => i !== index));
-                  }}
-                >
-                  <AntDesign name="close" size={16} color="white" />
-                </TouchableOpacity>
-                <View
-                  style={[
-                    styles.thumbnailIndicator,
-                    item.type === 'label' ? styles.labelIndicator : styles.fruitIndicator
-                  ]}
-                />
-              </View>
-            ))}
-          </ScrollView>
-        </View>
+        <SafeAreaView style={styles.thumbnailsContainer}>
+          <View style={styles.thumbnailsRow}>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+              {capturedPhotos.map((item, index) => (
+                <View key={index} style={styles.thumbnailContainer}>
+                  <Image source={{ uri: item.uri }} style={styles.thumbnail} />
+                  <TouchableOpacity
+                    style={styles.deleteButton}
+                    onPress={() => handleDeletePhoto(item, index)}
+                  >
+                    <AntDesign name="close" size={16} color="white" />
+                  </TouchableOpacity>
+                  <View
+                    style={[
+                      styles.thumbnailIndicator,
+                      item.type === 'label' ? styles.labelIndicator : styles.fruitIndicator
+                    ]}
+                  />
+                </View>
+              ))}
+            </ScrollView>
+          </View>
+        </SafeAreaView>
 
         {/* Mode Selector at the bottom (Labels / Fruits) */}
         <View style={styles.modeSelectorBottom}>
@@ -336,7 +364,7 @@ import React, { useRef, useState, useEffect } from 'react';
     // Bottom "Labels/Fruits" switch
     modeSelectorBottom: {
       position: 'absolute',
-      top: 100, // Increase this value to move it higher up
+      top: 160, // Increase this value to move it higher up
       left: 0,
       right: 0,
       backgroundColor: 'transparent',

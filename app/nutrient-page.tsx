@@ -40,20 +40,20 @@ export default function UserNutrientPage() {
 
   // State for nutrient inputs (now as numbers without units)
   const [nutrients, setNutrients] = useState({
-    sugar: 15,
-    sodium: 250,
-    calories: 200
+    carbohydrate: 88,
+    sodium: 1.83,
+    protein: 3.5
   });
 
   const [isEditing, setIsEditing] = useState({
-    sugar: false,
+    carbohydrate: false,
     sodium: false,
-    calories: false
+    protein: false
   });
 
   interface NutritionData {
     userIntake: {
-      breakdown: { calories: number; sugar: number; sodium: number };
+      breakdown: { carbohydrate: number; sodium: number; protein: number };
       total: number;
     };
   }
@@ -61,30 +61,30 @@ export default function UserNutrientPage() {
 
   const [nutritionData, setNutritionData] = useState<NutritionData>({
       userIntake: { 
-        breakdown: { calories: 22, sugar: 45, sodium: 22 },
-        total: 209
+        breakdown: { carbohydrate: 94, sodium: 2, protein: 4 },
+        total: 93.33
       }
     });
 
-    const textUserIntakeCalories = toPercentageText(nutritionData.userIntake.breakdown.calories);
-    const textUserIntakeSugar = toPercentageText(nutritionData.userIntake.breakdown.sugar);
-    const textUserIntake = toPercentageText(nutritionData.userIntake.breakdown.sodium);
+    const textUserIntakeCarbohydrate = toPercentageText(nutritionData.userIntake.breakdown.carbohydrate);
+    const textUserIntakeSodium = toPercentageText(nutritionData.userIntake.breakdown.sodium);
+    const textUserIntake = toPercentageText(nutritionData.userIntake.breakdown.protein);
 
     const totalUserIntake = formatValue(nutritionData.userIntake.total);
 
     const donutSeries = [
-      { value: nutritionData.userIntake.breakdown.sodium, color: '#000000' },
-      { value: nutritionData.userIntake.breakdown.sugar, color: '#c0b4b4' },
-      { value: nutritionData.userIntake.breakdown.calories, color: '#7ca844' },
+      { value: nutritionData.userIntake.breakdown.protein, color: '#000000' },
+      { value: nutritionData.userIntake.breakdown.sodium, color: '#c0b4b4' },
+      { value: nutritionData.userIntake.breakdown.carbohydrate, color: '#7ca844' },
     ];
 
   // Toggle edit mode
-  const toggleEdit = (key: 'sugar' | 'sodium' | 'calories') => {
+  const toggleEdit = (key: 'sodium' | 'protein' | 'carbohydrate') => {
     setIsEditing(prev => ({ ...prev, [key]: !prev[key] }));
   };
 
   // Handle nutrient change
-  const handleNutrientChange = (key: 'sugar' | 'sodium' | 'calories', value: string) => {
+  const handleNutrientChange = (key: 'sodium' | 'protein' | 'carbohydrate', value: string) => {
     const numValue = parseInt(value) || 0;
     setNutrients(prev => ({ ...prev, [key]: numValue }));
   };
@@ -201,26 +201,26 @@ export default function UserNutrientPage() {
               <View style={styles.inputSection}>
                 {/* Sugar Input */}
                 <View style={styles.inputRow}>
-                  <Image source={require('@/assets/images/Sugar Icon.png')} style={styles.icon} />
-                  <Text style={styles.nutrientText}>Sugar</Text>
+                  <Image source={require('@/assets/images/Carbohydrate Icon.png')} style={styles.icon} />
+                  <Text style={styles.nutrientText}>Carbs</Text>
                   <View style={styles.divider} />
                   <View style={styles.inputBox}>
-                    {isEditing.sugar ? (
+                    {isEditing.carbohydrate ? (
                       <TextInput
                         style={styles.input}
-                        value={nutrients.sugar.toString()}
-                        onChangeText={(text) => handleNutrientChange('sugar', text)}
+                        value={nutrients.carbohydrate.toString()}
+                        onChangeText={(text) => handleNutrientChange('carbohydrate', text)}
                         autoFocus
-                        onBlur={() => toggleEdit('sugar')}
+                        onBlur={() => toggleEdit('carbohydrate')}
                         keyboardType="numeric"
                         textAlign="center"
                       />
                     ) : (
                       <>
-                        <Text style={styles.inputText}>{nutrients.sugar}</Text>
+                        <Text style={styles.inputText}>{nutrients.carbohydrate}</Text>
                         <TouchableOpacity 
                           style={styles.editButtonInside}
-                          onPress={() => toggleEdit('sugar')}
+                          onPress={() => toggleEdit('carbohydrate')}
                         >
                           <Image source={require('@/assets/images/Edit Icon.png')} style={styles.editIcon} />
                         </TouchableOpacity>
@@ -261,26 +261,26 @@ export default function UserNutrientPage() {
 
                 {/* Calories Input */}
                 <View style={styles.inputRow}>
-                  <Image source={require('@/assets/images/Cholesterol Icon.png')} style={styles.icon} />
-                  <Text style={styles.nutrientText}>Calories</Text>
+                  <Image source={require('@/assets/images/Protein Icon.png')} style={styles.icon} />
+                  <Text style={styles.nutrientText}>Protein</Text>
                   <View style={styles.divider} />
                   <View style={styles.inputBox}>
-                    {isEditing.calories ? (
+                    {isEditing.protein ? (
                       <TextInput
                         style={styles.input}
-                        value={nutrients.calories.toString()}
-                        onChangeText={(text) => handleNutrientChange('calories', text)}
+                        value={nutrients.protein.toString()}
+                        onChangeText={(text) => handleNutrientChange('protein', text)}
                         autoFocus
-                        onBlur={() => toggleEdit('calories')}
+                        onBlur={() => toggleEdit('protein')}
                         keyboardType="numeric"
                         textAlign="center"
                       />
                     ) : (
                       <>
-                        <Text style={styles.inputText}>{nutrients.calories}</Text>
+                        <Text style={styles.inputText}>{nutrients.protein}</Text>
                         <TouchableOpacity 
                           style={styles.editButtonInside}
-                          onPress={() => toggleEdit('calories')}
+                          onPress={() => toggleEdit('protein')}
                         >
                           <Image source={require('@/assets/images/Edit Icon.png')} style={styles.editIcon} />
                         </TouchableOpacity>
@@ -298,9 +298,9 @@ export default function UserNutrientPage() {
                   <PieChart
                     widthAndHeight={150}
                     series={[
-                      { value: nutritionData.userIntake.breakdown.sodium, color: '#000000' },
-                      { value: nutritionData.userIntake.breakdown.sugar, color: '#c0b4b4' },
-                      { value: nutritionData.userIntake.breakdown.calories, color: '#7ca844' },
+                      { value: nutritionData.userIntake.breakdown.protein, color: '#000000' },
+                      { value: nutritionData.userIntake.breakdown.sodium, color: '#c0b4b4' },
+                      { value: nutritionData.userIntake.breakdown.carbohydrate, color: '#7ca844' },
                     ]}
                     cover={0.55}
                   />
@@ -309,15 +309,15 @@ export default function UserNutrientPage() {
                   <Text style={styles.chartTitle}>User Intake</Text>
                   <View style={styles.legendItem}>
                     <View style={[styles.colorCircle, { backgroundColor: '#7ca844' }]} />
-                    <Text style={styles.legendLabel}>Calories ({toPercentageText(nutritionData.userIntake.breakdown.calories)})</Text>
+                    <Text style={styles.legendLabel}>Carbohydrate ({toPercentageText(nutritionData.userIntake.breakdown.carbohydrate)})</Text>
                   </View>
                   <View style={styles.legendItem}>
                     <View style={[styles.colorCircle, { backgroundColor: '#c0b4b4' }]} />
-                    <Text style={styles.legendLabel}>Sugar ({toPercentageText(nutritionData.userIntake.breakdown.sugar)})</Text>
+                    <Text style={styles.legendLabel}>Sodium ({toPercentageText(nutritionData.userIntake.breakdown.sodium)})</Text>
                   </View>
                   <View style={styles.legendItem}>
                     <View style={[styles.colorCircle, { backgroundColor: '#000000' }]} />
-                    <Text style={styles.legendLabel}>Sodium ({toPercentageText(nutritionData.userIntake.breakdown.sodium)})</Text>
+                    <Text style={styles.legendLabel}>Protein ({toPercentageText(nutritionData.userIntake.breakdown.protein)})</Text>
                   </View>
                   <View style={styles.totalBox}>
                     <Text style={styles.totalText}>
@@ -594,7 +594,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 12,
   },
   legendLabel: {
-    fontSize: 14,
+    fontSize: 12,
     color: '#333',
   },
   totalBox: {

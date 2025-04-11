@@ -18,8 +18,13 @@ import { useNavigation } from 'expo-router';
 import { RootStackParamList } from '@/types/types';
 import { StackNavigationProp } from '@react-navigation/stack';
 import * as MediaLibrary from 'expo-media-library';
+import PieChart from 'react-native-pie-chart';
 
 const { width, height } = Dimensions.get('window');
+
+// Helper Function
+const toPercentageText = (value: number): string => `${value}%`;
+const formatValue = (value: number, unit: string = 'g'): string => `${value} ${unit}`;
 
 type HomeScreenNavigationProp = StackNavigationProp<RootStackParamList, 'index'>;
 
@@ -45,6 +50,33 @@ export default function UserNutrientPage() {
     sodium: false,
     calories: false
   });
+
+  interface NutritionData {
+    userIntake: {
+      breakdown: { calories: number; sugar: number; sodium: number };
+      total: number;
+    };
+  }
+  
+
+  const [nutritionData, setNutritionData] = useState<NutritionData>({
+      userIntake: { 
+        breakdown: { calories: 22, sugar: 45, sodium: 22 },
+        total: 209
+      }
+    });
+
+    const textUserIntakeCalories = toPercentageText(nutritionData.userIntake.breakdown.calories);
+    const textUserIntakeSugar = toPercentageText(nutritionData.userIntake.breakdown.sugar);
+    const textUserIntake = toPercentageText(nutritionData.userIntake.breakdown.sodium);
+
+    const totalUserIntake = formatValue(nutritionData.userIntake.total);
+
+    const donutSeries = [
+      { value: nutritionData.userIntake.breakdown.sodium, color: '#000000' },
+      { value: nutritionData.userIntake.breakdown.sugar, color: '#c0b4b4' },
+      { value: nutritionData.userIntake.breakdown.calories, color: '#7ca844' },
+    ];
 
   // Toggle edit mode
   const toggleEdit = (key: 'sugar' | 'sodium' | 'calories') => {
@@ -110,7 +142,7 @@ export default function UserNutrientPage() {
   };
 
   const handleCheck = () => {
-    navigation.navigate('camera');
+    navigation.navigate('page-6');
   };
 
   if (!fontsLoaded) {
@@ -130,7 +162,6 @@ export default function UserNutrientPage() {
                 <Image 
                   source={require('@/assets/images/NutriVision.png')} 
                   style={styles.logo}
-                  resizeMode="contain"
                 />
               </View>
               
@@ -258,6 +289,45 @@ export default function UserNutrientPage() {
                   </View>
                 </View>
               </View>
+
+              <View style={styles.chartsContainer}>
+            {/* User Intake Donut Chart */}
+            <View style={styles.chartBox}>
+              <View style={styles.chartRow}>
+                <View style={styles.chartWrapper}>
+                  <PieChart
+                    widthAndHeight={150}
+                    series={[
+                      { value: nutritionData.userIntake.breakdown.sodium, color: '#000000' },
+                      { value: nutritionData.userIntake.breakdown.sugar, color: '#c0b4b4' },
+                      { value: nutritionData.userIntake.breakdown.calories, color: '#7ca844' },
+                    ]}
+                    cover={0.55}
+                  />
+                </View>
+                <View style={styles.legendWrapper}>
+                  <Text style={styles.chartTitle}>User Intake</Text>
+                  <View style={styles.legendItem}>
+                    <View style={[styles.colorCircle, { backgroundColor: '#7ca844' }]} />
+                    <Text style={styles.legendLabel}>Calories ({toPercentageText(nutritionData.userIntake.breakdown.calories)})</Text>
+                  </View>
+                  <View style={styles.legendItem}>
+                    <View style={[styles.colorCircle, { backgroundColor: '#c0b4b4' }]} />
+                    <Text style={styles.legendLabel}>Sugar ({toPercentageText(nutritionData.userIntake.breakdown.sugar)})</Text>
+                  </View>
+                  <View style={styles.legendItem}>
+                    <View style={[styles.colorCircle, { backgroundColor: '#000000' }]} />
+                    <Text style={styles.legendLabel}>Sodium ({toPercentageText(nutritionData.userIntake.breakdown.sodium)})</Text>
+                  </View>
+                  <View style={styles.totalBox}>
+                    <Text style={styles.totalText}>
+                      Total Nutrient{'\n'}Amount = {formatValue(nutritionData.userIntake.total)}
+                    </Text>
+                  </View>
+                </View>
+              </View>
+            </View>
+          </View>
             </View>
           </ScrollView>
       </KeyboardAvoidingView>
@@ -270,6 +340,7 @@ export default function UserNutrientPage() {
   );
 }
 
+const screenWidth = Dimensions.get('window').width;
 const styles = StyleSheet.create({
   keyboardAvoidingContainer: {
     flex: 1,
@@ -297,7 +368,9 @@ const styles = StyleSheet.create({
   },
   logo: {
     width: 200,
-    height: 150,
+    height: 60,
+    resizeMode: 'contain',
+    alignSelf: 'flex-start',
   },
   userIntakeCard: {
     marginTop: -15,
@@ -372,6 +445,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 6,
     elevation: 4,
+    marginBottom: 20,
   },
   inputRow: {
     flexDirection: 'row',
@@ -425,6 +499,114 @@ const styles = StyleSheet.create({
     backgroundColor: '#DDDDDD',
     flex: 1, // Makes it take up available space
     marginHorizontal: 10,
+  },
+  innerRow: {
+    flexDirection: 'row',
+  },
+  newLeftColumn: {
+    flex: 60,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  newRightColumn: {
+    flex: 40,
+    paddingLeft: 10,
+    justifyContent: 'center',
+    gap: 6,
+  },
+  newLegendTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 8,
+    marginLeft: -20
+  },
+  newLegendItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 4,
+  },
+  newCircle: {
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    marginRight: 6,
+  },
+  newLegendText: {
+    fontSize: 14,
+    color: '#333',
+  },
+  newTotalBox: {
+    backgroundColor: '#f8e4e4',
+    marginTop: 10,
+    padding: 10,
+    borderRadius: 15,
+    alignItems: 'flex-start',
+    marginLeft: -20,
+  },
+  newTotalText: {
+    fontSize: 16,
+    color: '#333',
+    textAlign: 'left'
+  },
+  chartsContainer: {
+    gap: 16,
+  },
+  chartBox: {
+    backgroundColor: 'white',
+    borderRadius: 12,
+    padding: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 6,
+    elevation: 4,
+  },
+  chartRow: {
+    flexDirection: 'row',
+  },
+  chartWrapper: {
+    position: 'relative',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  legendWrapper: {
+    flex: 1,
+    justifyContent: 'center',
+    paddingLeft: 16,
+  },
+  legendItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 4,
+  },
+  legendItemSpacing: {
+    marginLeft: 24, // Additional spacing for the second legend
+  },
+  chartTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 12,
+  },
+  colorCircle: {
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    marginHorizontal: 12,
+  },
+  legendLabel: {
+    fontSize: 14,
+    color: '#333',
+  },
+  totalBox: {
+    backgroundColor: '#f8e4e4',
+    padding: 12,
+    borderRadius: 12,
+    marginTop: 12,
+  },
+  totalText: {
+    fontSize: 14,
+    color: '#333',
+    textAlign: 'left',
   },
   checkButton: {
     position: 'absolute',

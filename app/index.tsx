@@ -25,6 +25,7 @@ const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 type HomeScreenNavigationProp = StackNavigationProp<RootStackParamList, 'index'>;
 
+
 export default function HomeScreen() {
   // ======== AGE STATE ========
   const [age, setAge] = useState<number>(25);
@@ -112,14 +113,13 @@ export default function HomeScreen() {
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
-    <View style={{ flex: 1 }}>
       <KeyboardAvoidingView
         style={{ flex: 1 }}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         keyboardVerticalOffset={Platform.OS === 'ios' ? 20 : 0} // Adjust as needed
       >
         <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
-          <ThemedView style={[styles.container, { backgroundColor: '#eff1f6' }]}>
+          
             <ScrollView contentContainerStyle={{ flexGrow: 1 }} keyboardShouldPersistTaps="handled">
               {/* Background/Top Image */}
               <Image
@@ -128,7 +128,8 @@ export default function HomeScreen() {
                 accessibilityRole="image"
                 accessibilityLabel="NutriVision logo"
               />
-
+              <ThemedView style={[styles.container, { backgroundColor: '#eff1f6' }]}>
+              {/* Logo kept from original */}
               {/* ===== NEW PROFILE BOX ===== */}
               <View style={styles.profileBox}>
                 <ThemedText style={styles.profileBoxText}>
@@ -143,7 +144,7 @@ export default function HomeScreen() {
                   renderItem={renderDetailBox}
                   width={SCREEN_WIDTH - 20}
                   height={160}
-                  style={{ alignSelf: 'center' }}
+                  style={{ alignSelf: 'center', overflow: 'visible' }} 
                   onSnapToItem={index => setActiveIndex(index)}
                 />
 
@@ -162,10 +163,10 @@ export default function HomeScreen() {
               <View style={styles.ageContainer}>
                 <View style={styles.leftColumn}>
                   <View style={styles.topLeft}>
-                    <ThemedText style={styles.ageTitle}>Age</ThemedText>
+                    <ThemedText style={styles.containerTitle}>Age</ThemedText>
                   </View>
                   <View style={styles.bottomLeft}>
-                    <ThemedText style={styles.ageSubtitle}>
+                    <ThemedText style={styles.containerSubtitle}>
                       Age affects nutrient intake by changing metabolism, absorption, and dietary needs.
                     </ThemedText>
                   </View>
@@ -211,11 +212,11 @@ export default function HomeScreen() {
               <View style={styles.weightContainer}>
                 <View style={styles.leftColumn}>
                   <View style={styles.topLeft}>
-                    <ThemedText style={styles.ageTitle}>Weight</ThemedText>
+                    <ThemedText style={styles.containerTitle}>Weight</ThemedText>
                   </View>
                   <View style={styles.bottomLeft}>
-                    <ThemedText style={styles.ageSubtitle}>
-                      Weight affects nutrient needs by influencing metabolism and abssadsaaadsorption.
+                    <ThemedText style={styles.containerSubtitle}>
+                      Weight affects nutrient needs by influencing metabolism and absorption.
                     </ThemedText>
                   </View>
                 </View>
@@ -235,7 +236,7 @@ export default function HomeScreen() {
                       <Switch
                         trackColor={{ false: '#e0e0e0', true: '#e0e0e0' }}
                         thumbColor={'#9AB106'}
-                        style={{ transform: [{ scaleX: 0.6 }, { scaleY: 0.6 }] }}
+                        style={styles.switch}
                         value={!isKg}
                         onValueChange={toggleWeightUnit}
                       />
@@ -244,15 +245,15 @@ export default function HomeScreen() {
                   </View>
                 </View>
               </View>
-
+             
               {/* =============== HEIGHT CONTAINER =============== */}
               <View style={styles.heightContainer}>
                 <View style={styles.leftColumn}>
                   <View style={styles.topLeft}>
-                    <ThemedText style={styles.ageTitle}>Height</ThemedText>
+                    <ThemedText style={styles.containerTitle}>Height</ThemedText>
                   </View>
                   <View style={styles.bottomLeft}>
-                    <ThemedText style={styles.ageSubtitle}>
+                    <ThemedText style={styles.containerSubtitle}>
                       Height affects nutrient needs, growth, and overall development requirements.
                     </ThemedText>
                   </View>
@@ -273,31 +274,30 @@ export default function HomeScreen() {
                       <Switch
                         trackColor={{ false: '#e0e0e0', true: '#e0e0e0' }}
                         thumbColor={'#9AB106'}
-                        style={{ transform: [{ scaleX: 0.6 }, { scaleY: 0.6 }] }}
+                        style={styles.switch}
                         value={!isFt}
                         onValueChange={toggleHeightUnit}
                       />
                       <ThemedText style={styles.switchLabel}>cm</ThemedText>
+                      
                     </View>
+                    
                   </View>
+                  
                 </View>
               </View>
+               </ThemedView>
             </ScrollView>
-          </ThemedView>
+            
         </TouchableWithoutFeedback>
+        
       </KeyboardAvoidingView>
       
       
       {/* Floating check button outside the KeyboardAvoidingView */}
-      <TouchableOpacity style={styles.checkButton1} onPress={handleNext}>
-        <ThemedText style={styles.checkMark}>✓</ThemedText>
-      </TouchableOpacity>
-
-      {/* Floating check button outside the KeyboardAvoidingView */}
       <TouchableOpacity style={styles.checkButton} onPress={handleCheck}>
         <ThemedText style={styles.checkMark}>✓</ThemedText>
       </TouchableOpacity>
-
     </View>
     </SafeAreaView>
   );
@@ -306,6 +306,8 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    gap: 10,
+    padding: 10,
   },
   image: {
     width: 200,
@@ -314,19 +316,18 @@ const styles = StyleSheet.create({
     alignSelf: "flex-start"
   },
   carouselContainer: {
-    marginTop: 20,
     alignItems: 'center',
   },
   carouselDetailBox: {
     backgroundColor: 'white',
+    margin: 4,
     borderRadius: 12,
     padding: 16,
-    marginHorizontal: 10,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.1,
     shadowRadius: 6,
-    elevation: 4,
+    elevation: 4, 
     flex: 1,
     justifyContent: 'center',
   },
@@ -339,16 +340,15 @@ const styles = StyleSheet.create({
   paginationContainer: {
     flexDirection: 'row',
     justifyContent: 'center',
-    marginTop: 8,
   },
   dot: {
     width: 8,
     height: 8,
     borderRadius: 4,
     marginHorizontal: 3,
+    marginTop: 8,
   },
   ageContainer: {
-    marginTop: 20,
     width: SCREEN_WIDTH - 20,
     alignSelf: 'center',
     flexDirection: 'row',
@@ -363,7 +363,6 @@ const styles = StyleSheet.create({
     elevation: 4,
   },
   weightContainer: {
-    marginTop: 20,
     width: SCREEN_WIDTH - 20,
     alignSelf: 'center',
     flexDirection: 'row',
@@ -378,7 +377,6 @@ const styles = StyleSheet.create({
     elevation: 4,
   },
   heightContainer: {
-    marginTop: 20,
     width: SCREEN_WIDTH - 20,
     alignSelf: 'center',
     flexDirection: 'row',
@@ -413,13 +411,13 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  ageTitle: {
+  containerTitle: {
     fontSize: 24,
     fontWeight: 'bold',
     color: '#385802',
     textAlign: 'left',
   },
-  ageSubtitle: {
+  containerSubtitle: {
     fontSize: 10,
     lineHeight: 16,
     color: '#666',
@@ -427,7 +425,6 @@ const styles = StyleSheet.create({
   counterWrapper: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 8,
   },
   counterButton: {
     paddingHorizontal: 6,
@@ -461,7 +458,6 @@ const styles = StyleSheet.create({
   weightInput: {
     height: 36,
     width: 60,
-    marginBottom: 8,
     borderWidth: 1,
     borderColor: '#e0e0e0',
     borderRadius: 15,
@@ -472,18 +468,23 @@ const styles = StyleSheet.create({
     backgroundColor: '#eaeaea',
   },
   switchRow: {
+    width: '20%',
+    flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
-    marginTop: 2,
   },
   switchLabel: {
-    marginHorizontal: 0,
     fontSize: 14,
     color: '#333',
+    textAlign: 'center',
+  },
+  switch: {
+    transform: [{ scaleX: 0.6 }, { scaleY: 0.6 }],
+    
   },
   checkButton: {
     position: 'absolute',
-    bottom: 10,
+    bottom: 40,
     right: 20,
     width: 60,
     height: 60,
@@ -514,8 +515,6 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   profileBox: {
-    marginTop: 15,
-    marginLeft: 10,
     width: 150,
     height: 50,
     backgroundColor: 'white',

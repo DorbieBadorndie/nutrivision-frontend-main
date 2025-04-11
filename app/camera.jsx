@@ -27,7 +27,7 @@ import React, { useRef, useState, useEffect, createContext, useContext } from 'r
   import axios from 'axios';
   import PhotoPreviewSection from '@/components/PhotoPreviewSection';
   import { navigate } from 'expo-router/build/global-state/routing';
-
+ 
   const { height } = Dimensions.get('window');
 
   export async function uploadImagesAxios(images) {
@@ -73,7 +73,7 @@ import React, { useRef, useState, useEffect, createContext, useContext } from 'r
     const [capturedPhotos, setCapturedPhotos] = useState([]);
     const [mediaLibraryPermission, setMediaLibraryPermission] = useState(null);
     //const { uploadImages, isLoading } = useApi();
-
+    const { setExtractedData } = useApi();
     // Always vertical (portrait) orientation. No toggle.
     const boxOrientation = 'vertical';
 
@@ -119,6 +119,7 @@ import React, { useRef, useState, useEffect, createContext, useContext } from 'r
           }
         );
         console.log('✅ Response from server:', response.data);
+        setExtractedData(response.data);
         return response.data;
       } catch (err) {
         console.error('❌ Axios upload error:', err);
